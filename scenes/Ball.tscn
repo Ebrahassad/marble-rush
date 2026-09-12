@@ -1,0 +1,24 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/ball/marble-low.glb" id="1"]
+[ext_resource type="Script" path="res://scripts/ball_controller.gd" id="2"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_1"]
+radius = 0.5
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_1"]
+friction = 0.9
+bounce = 0.05
+
+[node name="Ball" type="RigidBody3D"]
+contact_monitor = true
+max_contacts_reported = 4
+physics_material_override = SubResource("PhysicsMaterial_1")
+script = ExtResource("2")
+
+[node name="Model" parent="." instance=ExtResource("1")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_1")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
