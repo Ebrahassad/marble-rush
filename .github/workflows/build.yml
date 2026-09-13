@@ -18,6 +18,9 @@ jobs:
       - name: Decode debug keystore
         run: echo "${{ secrets.GODOT_KEYSTORE_B64 }}" | base64 -d > debug.keystore
 
+      - name: Verify keystore integrity
+        run: keytool -list -v -keystore debug.keystore -storepass android -alias androiddebugkey
+
       - name: Point export preset to keystore
         run: |
           sed -i 's#keystore/debug=".*"#keystore/debug="debug.keystore"#' export_presets.cfg
