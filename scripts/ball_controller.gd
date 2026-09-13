@@ -1,6 +1,7 @@
 extends RigidBody3D
 
 @export var forward_speed: float = 6.0
+@export var max_forward_speed: float = 14.0
 @export var steer_force: float = 12.0
 @export var jump_impulse: float = 6.0
 @export var fast_fall_force: float = 25.0
@@ -33,7 +34,8 @@ func _apply_material_recursive(node: Node, mat: Material) -> void:
 		_apply_material_recursive(child, mat)
 
 func _physics_process(delta: float) -> void:
-	apply_central_force(Vector3(0, 0, -forward_speed * mass))
+	if linear_velocity.z > -max_forward_speed:
+		apply_central_force(Vector3(0, 0, -forward_speed * mass))
 
 	if global_position.x > lane_limit:
 		apply_central_force(Vector3(-steer_force * mass, 0, 0))
