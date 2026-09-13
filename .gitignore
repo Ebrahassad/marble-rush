@@ -1,0 +1,7 @@
+.godot/
+*.import
+export_presets.cfg
+export_presets_b64.txt
+keystore_b64.txt
+*.keystore
+android/
