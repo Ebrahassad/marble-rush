@@ -1,0 +1,39 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Decode export presets
+        run: echo "${{ secrets.GODOT_EXPORT_PRESETS_B64 }}" | base64 -d > export_presets.cfg
+
+      - name: Decode debug keystore
+        run: echo "${{ secrets.GODOT_KEYSTORE_B64 }}" | base64 -d > debug.keystore
+
+      - name: Point export preset to keystore
+        run: |
+          sed -i 's#keystore/debug=".*"#keystore/debug="debug.keystore"#' export_presets.cfg
+          sed -i 's#keystore/debug_user=".*"#keystore/debug_user="androiddebugkey"#' export_presets.cfg
+          sed -i 's#keystore/debug_password=".*"#keystore/debug_password="android"#' export_presets.cfg
+
+      - name: Export APK
+        uses: firebelley/godot-export@v8.0.0
+        with:
+          godot_executable_download_url: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          godot_export_templates_download_url: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz
+          relative_project_path: ./
+          archive_output: false
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: marble-rush-apk
+          path: "**/*.apk"
