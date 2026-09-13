@@ -18,3 +18,7 @@ textures/vram_compression/import_etc2_astc=true
 [display]
 
 window/handheld/orientation="portrait"
+
+[autoload]
+
+ThemeManager="*res://scripts/theme_manager.gd"

@@ -13,14 +13,15 @@ var is_grounded: bool = false
 var fast_falling: bool = false
 
 func _ready() -> void:
-	var gold_material := StandardMaterial3D.new()
-	gold_material.albedo_color = Color(0.83, 0.68, 0.21)
-	gold_material.metallic = 0.85
-	gold_material.roughness = 0.15
-	gold_material.emission_enabled = true
-	gold_material.emission = Color(0.6, 0.45, 0.05)
-	gold_material.emission_energy_multiplier = 0.3
-	_apply_material_recursive(self, gold_material)
+	var theme_data: Dictionary = ThemeManager.get_current_theme()
+	var ball_material := StandardMaterial3D.new()
+	ball_material.albedo_color = theme_data.ball_color
+	ball_material.metallic = 0.85
+	ball_material.roughness = 0.15
+	ball_material.emission_enabled = true
+	ball_material.emission = theme_data.ball_emission
+	ball_material.emission_energy_multiplier = 0.3
+	_apply_material_recursive(self, ball_material)
 
 func _apply_material_recursive(node: Node, mat: Material) -> void:
 	if node is MeshInstance3D:

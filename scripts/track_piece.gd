@@ -1,11 +1,12 @@
 extends StaticBody3D
 
 func _ready() -> void:
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.16, 0.08, 0.27)
-	mat.metallic = 0.4
-	mat.roughness = 0.5
-	_apply_material_recursive(self, mat)
+	var theme_data: Dictionary = ThemeManager.get_current_theme()
+	var track_material := StandardMaterial3D.new()
+	track_material.albedo_color = theme_data.track_color
+	track_material.metallic = 0.4
+	track_material.roughness = 0.5
+	_apply_material_recursive(self, track_material)
 
 func _apply_material_recursive(node: Node, mat: Material) -> void:
 	if node is MeshInstance3D:
