@@ -43,6 +43,8 @@ jobs:
           mkdir -p android/build
           unzip -q ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_source.zip -d android/build
           chmod +x android/build/gradlew
+          echo -n "${GODOT_VERSION}.stable" > android/.build_version
+          echo -n "${GODOT_VERSION}.stable" > android/build/.build_version
 
       - name: Decode export presets
         run: echo "${{ secrets.GODOT_EXPORT_PRESETS_B64 }}" | base64 -d > export_presets.cfg
