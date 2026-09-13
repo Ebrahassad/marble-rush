@@ -12,6 +12,25 @@ var is_dragging: bool = false
 var is_grounded: bool = false
 var fast_falling: bool = false
 
+func _ready() -> void:
+	var gold_material := StandardMaterial3D.new()
+	gold_material.albedo_color = Color(0.83, 0.68, 0.21)
+	gold_material.metallic = 0.85
+	gold_material.roughness = 0.15
+	gold_material.emission_enabled = true
+	gold_material.emission = Color(0.6, 0.45, 0.05)
+	gold_material.emission_energy_multiplier = 0.3
+	_apply_material_recursive(self, gold_material)
+
+func _apply_material_recursive(node: Node, mat: Material) -> void:
+	if node is MeshInstance3D:
+		var mesh_instance: MeshInstance3D = node
+		if mesh_instance.mesh:
+			for i in range(mesh_instance.mesh.get_surface_count()):
+				mesh_instance.set_surface_override_material(i, mat)
+	for child in node.get_children():
+		_apply_material_recursive(child, mat)
+
 func _physics_process(delta: float) -> void:
 	apply_central_force(Vector3(0, 0, -forward_speed * mass))
 
