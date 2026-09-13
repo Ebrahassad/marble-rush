@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+env:
+  GODOT_VERSION: 4.7.2
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,27 +15,50 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Download Godot editor
+        run: |
+          wget -q -O godot.zip "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          chmod +x Godot_v${GODOT_VERSION}-stable_linux.x86_64
+          sudo mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
+
+      - name: Download export templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          wget -q -O templates.tpz "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          unzip -q templates.tpz -d /tmp/templates_extract
+          cp -r /tmp/templates_extract/templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
+
+      - name: Install Android Gradle build template into project
+        run: |
+          mkdir -p android/build
+          unzip -q ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_source.zip -d android/build
+          chmod +x android/build/gradlew
+
       - name: Decode export presets
         run: echo "${{ secrets.GODOT_EXPORT_PRESETS_B64 }}" | base64 -d > export_presets.cfg
 
       - name: Decode debug keystore
         run: echo "${{ secrets.GODOT_KEYSTORE_B64 }}" | base64 -d > debug.keystore
 
-      - name: Point export preset to keystore
+      - name: Configure export preset for gradle build
         run: |
           sed -i 's#keystore/debug=".*"#keystore/debug="debug.keystore"#' export_presets.cfg
           sed -i 's#keystore/debug_user=".*"#keystore/debug_user="androiddebugkey"#' export_presets.cfg
           sed -i 's#keystore/debug_password=".*"#keystore/debug_password="android"#' export_presets.cfg
+          sed -i 's#gradle_build/use_gradle_build=false#gradle_build/use_gradle_build=true#' export_presets.cfg
 
-      - name: Export APK
-        uses: firebelley/godot-export@v8.0.0
-        with:
-          godot_executable_download_url: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
-          godot_export_templates_download_url: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz
-          relative_project_path: ./
-          export_debug: true
-          use_preset_export_path: true
-          archive_output: false
+      - name: Export debug APK
+        run: godot --headless --export-debug "Android" marble-rush.apk --path .
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
