@@ -1,11 +1,11 @@
 extends RigidBody3D
 
-@export var forward_speed: float = 6.0
-@export var max_forward_speed: float = 14.0
-@export var steer_force: float = 12.0
+@export var forward_speed: float = 4.0
+@export var max_forward_speed: float = 8.0
+@export var steer_force: float = 10.0
 @export var jump_impulse: float = 6.0
 @export var fast_fall_force: float = 25.0
-@export var lane_limit: float = 2.5
+@export var lane_limit: float = 2.8
 
 var touch_start_x: float = 0.0
 var touch_start_y: float = 0.0
