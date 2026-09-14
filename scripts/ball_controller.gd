@@ -5,6 +5,7 @@ extends RigidBody3D
 @export var steer_force: float = 18.0
 @export var jump_impulse: float = 6.0
 @export var fast_fall_force: float = 25.0
+@export var slam_impulse: float = 4.0
 @export var lane_limit: float = 0.55
 @export var fall_death_y: float = -5.0
 
@@ -64,6 +65,9 @@ func _input(event: InputEvent) -> void:
 			touch_start_x = event.position.x
 			touch_start_y = event.position.y
 			is_dragging = true
+			if not is_grounded:
+				fast_falling = true
+				apply_central_impulse(Vector3(0, -slam_impulse * mass, 0))
 		else:
 			is_dragging = false
 			fast_falling = false

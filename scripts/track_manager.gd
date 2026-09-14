@@ -5,12 +5,14 @@ extends Node3D
 @export var coin_scene: PackedScene = preload("res://scenes/Coin.tscn")
 @export var piece_length: float = 2.19
 @export var pieces_ahead: int = 50
+@export var min_pieces_between_obstacles: int = 5
 @export var ball_path: NodePath
 
 var ball: Node3D
 var active_pieces: Array[Node3D] = []
 var next_z: float = 0.0
 var piece_count: int = 0
+var pieces_since_obstacle: int = 999
 var rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
@@ -39,12 +41,15 @@ func _spawn_piece() -> void:
 	active_pieces.append(piece)
 
 	piece_count += 1
+	pieces_since_obstacle += 1
+
 	if piece_count > 6:
 		var roll: float = rng.randf()
-		if roll < 0.12:
+		if roll < 0.12 and pieces_since_obstacle >= min_pieces_between_obstacles:
 			var obstacle: Node3D = obstacle_scene.instantiate()
 			add_child(obstacle)
 			obstacle.global_position = Vector3(0, 1.55, next_z)
+			pieces_since_obstacle = 0
 		elif roll < 0.32:
 			var coin: Node3D = coin_scene.instantiate()
 			add_child(coin)
