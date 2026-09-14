@@ -5,7 +5,8 @@ extends RigidBody3D
 @export var steer_force: float = 10.0
 @export var jump_impulse: float = 6.0
 @export var fast_fall_force: float = 25.0
-@export var lane_limit: float = 0.6
+@export var lane_limit: float = 0.4
+@export var fall_death_y: float = -5.0
 
 var touch_start_x: float = 0.0
 var touch_start_y: float = 0.0
@@ -34,6 +35,14 @@ func _apply_material_recursive(node: Node, mat: Material) -> void:
 		_apply_material_recursive(child, mat)
 
 func _physics_process(delta: float) -> void:
+	if GameManager.is_game_over:
+		return
+
+	if global_position.y < fall_death_y:
+		GameManager.trigger_game_over()
+		freeze = true
+		return
+
 	if linear_velocity.z > -max_forward_speed:
 		apply_central_force(Vector3(0, 0, -forward_speed * mass))
 
@@ -46,6 +55,9 @@ func _physics_process(delta: float) -> void:
 		apply_central_force(Vector3(0, -fast_fall_force * mass, 0))
 
 func _input(event: InputEvent) -> void:
+	if GameManager.is_game_over:
+		return
+
 	if event is InputEventScreenTouch:
 		if event.pressed:
 			touch_start_x = event.position.x

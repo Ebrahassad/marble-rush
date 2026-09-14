@@ -10,6 +10,7 @@ config/features=PackedStringArray("4.7", "Forward Plus")
 [autoload]
 
 ThemeManager="*res://scripts/theme_manager.gd"
+GameManager="*res://scripts/game_manager.gd"
 
 [display]
 

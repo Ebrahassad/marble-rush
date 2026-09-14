@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/Ball.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/TrackPiece.tscn" id="2"]
 [ext_resource type="Script" path="res://scripts/camera_follow.gd" id="3"]
 [ext_resource type="Script" path="res://scripts/track_manager.gd" id="4"]
 [ext_resource type="Script" path="res://scripts/environment_theme.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/hud.gd" id="6"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_1"]
 size = Vector2(600, 3000)
@@ -41,3 +42,46 @@ offset = Vector3(0, 2.4, 4.2)
 script = ExtResource("4")
 track_piece_scene = ExtResource("2")
 ball_path = NodePath("../Ball")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("6")
+ball_path = NodePath("../Ball")
+
+[node name="ScoreLabel" type="Label" parent="HUD"]
+offset_left = 24.0
+offset_top = 48.0
+offset_right = 300.0
+offset_bottom = 90.0
+theme_override_font_sizes/font_size = 32
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+text = "Score: 0"
+
+[node name="GameOverPanel" type="Control" parent="HUD"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+visible = false
+
+[node name="GameOverLabel" type="Label" parent="HUD/GameOverPanel"]
+anchor_left = 0.5
+anchor_top = 0.4
+anchor_right = 0.5
+anchor_bottom = 0.4
+offset_left = -150.0
+offset_right = 150.0
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 48
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+text = "Game Over"
+
+[node name="RestartButton" type="Button" parent="HUD/GameOverPanel"]
+anchor_left = 0.5
+anchor_top = 0.55
+anchor_right = 0.5
+anchor_bottom = 0.55
+offset_left = -100.0
+offset_right = 100.0
+offset_top = 0.0
+offset_bottom = 60.0
+text = "Restart"
+
+[connection signal="pressed" from="HUD/GameOverPanel/RestartButton" to="HUD" method="_on_restart_pressed"]
