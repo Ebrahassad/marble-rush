@@ -15,6 +15,7 @@ var is_grounded: bool = false
 var fast_falling: bool = false
 
 func _ready() -> void:
+	add_to_group("player")
 	var theme_data: Dictionary = ThemeManager.get_current_theme()
 	var ball_material := StandardMaterial3D.new()
 	ball_material.albedo_color = theme_data.ball_color
@@ -84,5 +85,9 @@ func _jump() -> void:
 		apply_central_impulse(Vector3(0, jump_impulse * mass, 0))
 		is_grounded = false
 
-func _on_body_entered(_body: Node) -> void:
-	is_grounded = true
+func _on_body_entered(body: Node) -> void:
+	if body.is_in_group("obstacles"):
+		GameManager.trigger_game_over()
+		freeze = true
+	else:
+		is_grounded = true

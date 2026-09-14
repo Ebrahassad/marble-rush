@@ -1,6 +1,8 @@
 extends Node3D
 
 @export var track_piece_scene: PackedScene = preload("res://scenes/TrackPiece.tscn")
+@export var obstacle_scene: PackedScene = preload("res://scenes/Obstacle.tscn")
+@export var coin_scene: PackedScene = preload("res://scenes/Coin.tscn")
 @export var piece_length: float = 2.19
 @export var pieces_ahead: int = 50
 @export var ball_path: NodePath
@@ -8,9 +10,12 @@ extends Node3D
 var ball: Node3D
 var active_pieces: Array[Node3D] = []
 var next_z: float = 0.0
+var piece_count: int = 0
+var rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	ball = get_node(ball_path)
+	rng.randomize()
 	for i in range(pieces_ahead):
 		_spawn_piece()
 
@@ -32,4 +37,17 @@ func _spawn_piece() -> void:
 	add_child(piece)
 	piece.global_position = Vector3(0, 0, next_z)
 	active_pieces.append(piece)
+
+	piece_count += 1
+	if piece_count > 6:
+		var roll: float = rng.randf()
+		if roll < 0.12:
+			var obstacle: Node3D = obstacle_scene.instantiate()
+			add_child(obstacle)
+			obstacle.global_position = Vector3(0, 1.55, next_z)
+		elif roll < 0.32:
+			var coin: Node3D = coin_scene.instantiate()
+			add_child(coin)
+			coin.global_position = Vector3(0, 1.5, next_z)
+
 	next_z -= piece_length

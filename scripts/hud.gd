@@ -11,7 +11,8 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if ball and not GameManager.is_game_over:
 		var distance: int = int(-ball.global_position.z)
-		$ScoreLabel.text = "Score: %d" % max(distance, 0)
+		var total: int = max(distance, 0) + GameManager.coin_score
+		$ScoreLabel.text = "Score: %d" % total
 
 func _on_game_over() -> void:
 	$GameOverPanel.visible = true
