@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/Ball.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/TrackPiece.tscn" id="2"]
@@ -75,6 +75,53 @@ theme_override_font_sizes/font_size = 32
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 text = "Score: 0"
 
+[node name="PauseButton" type="Button" parent="HUD"]
+offset_left = 600.0
+offset_top = 44.0
+offset_right = 670.0
+offset_bottom = 94.0
+theme_override_font_sizes/font_size = 24
+text = "II"
+
+[node name="PausePanel" type="Control" parent="HUD"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+visible = false
+
+[node name="PauseLabel" type="Label" parent="HUD/PausePanel"]
+anchor_left = 0.5
+anchor_top = 0.35
+anchor_right = 0.5
+anchor_bottom = 0.35
+offset_left = -100.0
+offset_right = 100.0
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 40
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+text = "Paused"
+
+[node name="ResumeButton" type="Button" parent="HUD/PausePanel"]
+anchor_left = 0.5
+anchor_top = 0.48
+anchor_right = 0.5
+anchor_bottom = 0.48
+offset_left = -100.0
+offset_right = 100.0
+offset_top = 0.0
+offset_bottom = 60.0
+text = "Resume"
+
+[node name="MenuButton" type="Button" parent="HUD/PausePanel"]
+anchor_left = 0.5
+anchor_top = 0.58
+anchor_right = 0.5
+anchor_bottom = 0.58
+offset_left = -100.0
+offset_right = 100.0
+offset_top = 0.0
+offset_bottom = 60.0
+text = "Main Menu"
+
 [node name="GameOverPanel" type="Control" parent="HUD"]
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -90,7 +137,8 @@ offset_right = 150.0
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 22
 theme_override_colors/font_color = Color(0.9, 0.85, 0.95, 1)
-text = "Score: 0\nBest: 0"
+text = "Score: 0
+Best: 0"
 
 [node name="GameOverLabel" type="Label" parent="HUD/GameOverPanel"]
 anchor_left = 0.5
@@ -115,4 +163,7 @@ offset_top = 0.0
 offset_bottom = 60.0
 text = "Restart"
 
+[connection signal="pressed" from="HUD/PauseButton" to="HUD" method="_on_pause_pressed"]
+[connection signal="pressed" from="HUD/PausePanel/ResumeButton" to="HUD" method="_on_resume_pressed"]
+[connection signal="pressed" from="HUD/PausePanel/MenuButton" to="HUD" method="_on_menu_pressed"]
 [connection signal="pressed" from="HUD/GameOverPanel/RestartButton" to="HUD" method="_on_restart_pressed"]
