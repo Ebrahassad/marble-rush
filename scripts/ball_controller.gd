@@ -89,6 +89,7 @@ func _jump() -> void:
 	if is_grounded:
 		apply_central_impulse(Vector3(0, jump_impulse * mass, 0))
 		is_grounded = false
+		SFX.play_jump()
 
 func _on_body_entered(body: Node) -> void:
 	if body.is_in_group("obstacles"):
