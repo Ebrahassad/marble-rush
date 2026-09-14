@@ -3,9 +3,9 @@ extends StaticBody3D
 func _ready() -> void:
 	var theme_data: Dictionary = ThemeManager.get_current_theme()
 	var track_material := StandardMaterial3D.new()
-	track_material.albedo_color = theme_data.track_color
-	track_material.metallic = 0.4
-	track_material.roughness = 0.5
+	track_material.albedo_color = theme_data.track_color.lightened(0.15)
+	track_material.metallic = 0.5
+	track_material.roughness = 0.4
 	_apply_material_recursive(self, track_material)
 
 func _apply_material_recursive(node: Node, mat: Material) -> void:

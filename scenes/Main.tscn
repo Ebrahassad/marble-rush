@@ -1,10 +1,17 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/Ball.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/TrackPiece.tscn" id="2"]
 [ext_resource type="Script" path="res://scripts/camera_follow.gd" id="3"]
 [ext_resource type="Script" path="res://scripts/track_manager.gd" id="4"]
 [ext_resource type="Script" path="res://scripts/environment_theme.gd" id="5"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_1"]
+size = Vector2(600, 3000)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
+albedo_color = Color(0.05, 0.02, 0.1, 1)
+roughness = 1.0
 
 [node name="Main" type="Node3D"]
 
@@ -16,13 +23,19 @@ transform = Transform3D(0.8, -0.4, 0.4, 0, 0.9, 0.4, -0.5, -0.3, 0.8, 0, 5, 0)
 light_color = Color(1, 0.92, 0.75, 1)
 shadow_enabled = true
 
+[node name="Ground" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.2, -1400)
+mesh = SubResource("PlaneMesh_1")
+surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+
 [node name="Ball" parent="." instance=ExtResource("1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 4.2)
+fov = 85.0
 script = ExtResource("3")
 target_path = NodePath("../Ball")
+offset = Vector3(0, 2.4, 4.2)
 
 [node name="TrackManager" type="Node3D" parent="."]
 script = ExtResource("4")
