@@ -2,10 +2,10 @@ extends RigidBody3D
 
 @export var forward_speed: float = 4.0
 @export var max_forward_speed: float = 8.0
-@export var steer_force: float = 10.0
+@export var steer_force: float = 18.0
 @export var jump_impulse: float = 6.0
 @export var fast_fall_force: float = 25.0
-@export var lane_limit: float = 0.4
+@export var lane_limit: float = 0.55
 @export var fall_death_y: float = -5.0
 
 var touch_start_x: float = 0.0
@@ -74,9 +74,10 @@ func _input(event: InputEvent) -> void:
 
 		if delta_y > 80.0:
 			fast_falling = true
-		elif abs(delta_x) > 30.0:
+		elif abs(delta_x) > 15.0:
 			var direction: float = sign(delta_x)
 			apply_central_force(Vector3(direction * steer_force * mass, 0, 0))
+			touch_start_x = event.position.x
 		elif delta_y < -80.0:
 			_jump()
 

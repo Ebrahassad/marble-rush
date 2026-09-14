@@ -18,4 +18,5 @@ func _on_game_over() -> void:
 	$GameOverPanel.visible = true
 
 func _on_restart_pressed() -> void:
+	GameManager.reset()
 	get_tree().reload_current_scene()
