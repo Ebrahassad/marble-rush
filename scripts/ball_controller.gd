@@ -5,7 +5,7 @@ extends RigidBody3D
 @export var steer_force: float = 10.0
 @export var jump_impulse: float = 6.0
 @export var fast_fall_force: float = 25.0
-@export var lane_limit: float = 2.8
+@export var lane_limit: float = 0.6
 
 var touch_start_x: float = 0.0
 var touch_start_y: float = 0.0
