@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_1"]
+top_radius = 0.0
+bottom_radius = 6.0
+height = 14.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1"]
+albedo_color = Color(0.09, 0.045, 0.16, 1)
+roughness = 1.0
+
+[node name="Mountain" type="MeshInstance3D"]
+mesh = SubResource("CylinderMesh_1")
+surface_material_override/0 = SubResource("StandardMaterial3D_1")

@@ -3,6 +3,7 @@ extends Node3D
 @export var track_piece_scene: PackedScene = preload("res://scenes/TrackPiece.tscn")
 @export var obstacle_scene: PackedScene = preload("res://scenes/Obstacle.tscn")
 @export var coin_scene: PackedScene = preload("res://scenes/Coin.tscn")
+@export var mountain_scene: PackedScene = preload("res://scenes/Mountain.tscn")
 @export var piece_length: float = 2.19
 @export var pieces_ahead: int = 50
 @export var min_pieces_between_obstacles: int = 5
@@ -10,6 +11,7 @@ extends Node3D
 
 var ball: Node3D
 var active_pieces: Array[Node3D] = []
+var active_mountains: Array[Node3D] = []
 var next_z: float = 0.0
 var piece_count: int = 0
 var pieces_since_obstacle: int = 999
@@ -34,6 +36,10 @@ func _process(_delta: float) -> void:
 		var old_piece: Node3D = active_pieces.pop_front()
 		old_piece.queue_free()
 
+	while active_mountains.size() > 0 and active_mountains[0].global_position.z - ball.global_position.z > piece_length * 40.0:
+		var old_mountain: Node3D = active_mountains.pop_front()
+		old_mountain.queue_free()
+
 func _spawn_piece() -> void:
 	var piece: Node3D = track_piece_scene.instantiate()
 	add_child(piece)
@@ -54,5 +60,15 @@ func _spawn_piece() -> void:
 			var coin: Node3D = coin_scene.instantiate()
 			add_child(coin)
 			coin.global_position = Vector3(0, 1.5, next_z)
+
+	if piece_count % 3 == 0:
+		var side: float = -1.0 if rng.randf() < 0.5 else 1.0
+		var mountain: Node3D = mountain_scene.instantiate()
+		add_child(mountain)
+		var x_offset: float = side * rng.randf_range(14.0, 26.0)
+		var height_scale: float = rng.randf_range(0.6, 1.8)
+		mountain.global_position = Vector3(x_offset, -3.0, next_z)
+		mountain.scale = Vector3(height_scale, height_scale, height_scale)
+		active_mountains.append(mountain)
 
 	next_z -= piece_length
