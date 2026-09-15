@@ -8,7 +8,7 @@ func _ready() -> void:
 		cached_material.albedo_color = Color(0.22, 0.22, 0.25)
 		cached_material.metallic = 0.15
 		cached_material.roughness = 0.75
-	_apply_material_recursive(self, cached_material)
+	_apply_material_recursive($Model, cached_material)
 
 func _apply_material_recursive(node: Node, mat: Material) -> void:
 	if node is MeshInstance3D:
