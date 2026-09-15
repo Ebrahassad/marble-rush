@@ -4,11 +4,10 @@ static var cached_material: StandardMaterial3D = null
 
 func _ready() -> void:
 	if cached_material == null:
-		var theme_data: Dictionary = ThemeManager.get_current_theme()
 		cached_material = StandardMaterial3D.new()
-		cached_material.albedo_color = theme_data.track_color.lightened(0.15)
-		cached_material.metallic = 0.5
-		cached_material.roughness = 0.4
+		cached_material.albedo_color = Color(0.22, 0.22, 0.25)
+		cached_material.metallic = 0.15
+		cached_material.roughness = 0.75
 	_apply_material_recursive(self, cached_material)
 
 func _apply_material_recursive(node: Node, mat: Material) -> void:
