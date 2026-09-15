@@ -154,6 +154,18 @@ theme_override_font_sizes/font_size = 50
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 text = "Game Over"
 
+[node name="MenuButtonGameOver" type="Button" parent="HUD/GameOverPanel"]
+anchor_left = 0.5
+anchor_top = 0.68
+anchor_right = 0.5
+anchor_bottom = 0.68
+offset_left = -130.0
+offset_right = 130.0
+offset_top = 0.0
+offset_bottom = 85.0
+theme_override_font_sizes/font_size = 28
+text = "Main Menu"
+
 [node name="RestartButton" type="Button" parent="HUD/GameOverPanel"]
 anchor_left = 0.5
 anchor_top = 0.56
@@ -170,3 +182,4 @@ text = "Restart"
 [connection signal="pressed" from="HUD/PausePanel/ResumeButton" to="HUD" method="_on_resume_pressed"]
 [connection signal="pressed" from="HUD/PausePanel/MenuButton" to="HUD" method="_on_menu_pressed"]
 [connection signal="pressed" from="HUD/GameOverPanel/RestartButton" to="HUD" method="_on_restart_pressed"]
+[connection signal="pressed" from="HUD/GameOverPanel/MenuButtonGameOver" to="HUD" method="_on_menu_pressed"]
