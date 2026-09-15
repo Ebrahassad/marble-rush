@@ -1,19 +1,24 @@
 extends RigidBody3D
 
 @export var forward_speed: float = 4.0
-@export var max_forward_speed: float = 8.0
+@export var base_max_forward_speed: float = 8.0
+@export var difficulty_ramp: float = 0.012
+@export var max_speed_cap: float = 20.0
 @export var steer_force: float = 18.0
 @export var jump_impulse: float = 6.0
 @export var fast_fall_force: float = 25.0
 @export var slam_impulse: float = 4.0
 @export var lane_limit: float = 0.55
 @export var fall_death_y: float = -5.0
+@export var jump_threshold: float = 40.0
+@export var fast_fall_threshold: float = 60.0
 
 var touch_start_x: float = 0.0
 var touch_start_y: float = 0.0
 var is_dragging: bool = false
 var is_grounded: bool = false
 var fast_falling: bool = false
+var jump_consumed: bool = false
 
 func _ready() -> void:
 	add_to_group("player")
@@ -45,7 +50,10 @@ func _physics_process(delta: float) -> void:
 		freeze = true
 		return
 
-	if linear_velocity.z > -max_forward_speed:
+	var distance: float = max(-global_position.z, 0.0)
+	var current_max_speed: float = min(base_max_forward_speed + distance * difficulty_ramp, max_speed_cap)
+
+	if linear_velocity.z > -current_max_speed:
 		apply_central_force(Vector3(0, 0, -forward_speed * mass))
 
 	if global_position.x > lane_limit:
@@ -65,10 +73,14 @@ func _input(event: InputEvent) -> void:
 			touch_start_x = event.position.x
 			touch_start_y = event.position.y
 			is_dragging = true
+			jump_consumed = false
 			if not is_grounded:
 				fast_falling = true
 				apply_central_impulse(Vector3(0, -slam_impulse * mass, 0))
 		else:
+			var total_delta_y: float = event.position.y - touch_start_y
+			if not jump_consumed and total_delta_y < -jump_threshold:
+				_jump()
 			is_dragging = false
 			fast_falling = false
 
@@ -76,19 +88,21 @@ func _input(event: InputEvent) -> void:
 		var delta_x: float = event.position.x - touch_start_x
 		var delta_y: float = event.position.y - touch_start_y
 
-		if delta_y > 80.0:
-			fast_falling = true
+		if abs(delta_y) > abs(delta_x):
+			if delta_y < -jump_threshold and not jump_consumed:
+				_jump()
+			elif delta_y > fast_fall_threshold:
+				fast_falling = true
 		elif abs(delta_x) > 15.0:
 			var direction: float = sign(delta_x)
 			apply_central_force(Vector3(direction * steer_force * mass, 0, 0))
 			touch_start_x = event.position.x
-		elif delta_y < -80.0:
-			_jump()
 
 func _jump() -> void:
 	if is_grounded:
 		apply_central_impulse(Vector3(0, jump_impulse * mass, 0))
 		is_grounded = false
+		jump_consumed = true
 		SFX.play_jump()
 
 func _on_body_entered(body: Node) -> void:
