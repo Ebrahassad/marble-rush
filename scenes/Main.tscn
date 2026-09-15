@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/Ball.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/TrackPiece.tscn" id="2"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/environment_theme.gd" id="5"]
 [ext_resource type="Script" path="res://scripts/hud.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/sky_decor.gd" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/Launcher.tscn" id="8"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_1"]
 size = Vector2(600, 3000)
@@ -49,6 +50,10 @@ mesh = SubResource("SphereMesh_moon")
 surface_material_override/0 = SubResource("StandardMaterial3D_moon")
 
 [node name="Ball" parent="." instance=ExtResource("1")]
+
+[node name="Launcher" parent="." instance=ExtResource("8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0.7)
+ball_path = NodePath("../Ball")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 4.2)

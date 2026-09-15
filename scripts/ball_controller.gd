@@ -19,6 +19,7 @@ var is_dragging: bool = false
 var is_grounded: bool = false
 var fast_falling: bool = false
 var jump_consumed: bool = false
+var movement_enabled: bool = false
 
 func _ready() -> void:
 	add_to_group("player")
@@ -41,8 +42,14 @@ func _apply_material_recursive(node: Node, mat: Material) -> void:
 	for child in node.get_children():
 		_apply_material_recursive(child, mat)
 
+func enable_movement() -> void:
+	movement_enabled = true
+
 func _physics_process(delta: float) -> void:
 	if GameManager.is_game_over:
+		return
+
+	if not movement_enabled:
 		return
 
 	if global_position.y < fall_death_y:
@@ -65,7 +72,7 @@ func _physics_process(delta: float) -> void:
 		apply_central_force(Vector3(0, -fast_fall_force * mass, 0))
 
 func _input(event: InputEvent) -> void:
-	if GameManager.is_game_over:
+	if GameManager.is_game_over or not movement_enabled:
 		return
 
 	if event is InputEventScreenTouch:
