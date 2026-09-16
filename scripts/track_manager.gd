@@ -3,22 +3,15 @@ extends Node3D
 @export var track_piece_scene: PackedScene = preload("res://scenes/TrackPiece.tscn")
 @export var obstacle_scene: PackedScene = preload("res://scenes/Obstacle.tscn")
 @export var coin_scene: PackedScene = preload("res://scenes/Coin.tscn")
+@export var tree_scene: PackedScene = preload("res://scenes/Tree.tscn")
 @export var piece_length: float = 2.19
 @export var pieces_ahead: int = 35
 @export var min_pieces_between_obstacles: int = 5
 @export var ball_path: NodePath
 
-var building_scenes: Array[PackedScene] = [
-	preload("res://assets/buildings/building-skyscraper-a.glb"),
-	preload("res://assets/buildings/building-skyscraper-b.glb"),
-	preload("res://assets/buildings/building-skyscraper-c.glb"),
-	preload("res://assets/buildings/building-skyscraper-d.glb"),
-	preload("res://assets/buildings/building-skyscraper-e.glb"),
-]
-
 var ball: Node3D
 var active_pieces: Array[Node3D] = []
-var active_buildings: Array[Node3D] = []
+var active_trees: Array[Node3D] = []
 var next_z: float = 0.0
 var piece_count: int = 0
 var pieces_since_obstacle: int = 999
@@ -43,16 +36,15 @@ func _process(_delta: float) -> void:
 		var old_piece: Node3D = active_pieces.pop_front()
 		old_piece.queue_free()
 
-	while active_buildings.size() > 0 and active_buildings[0].global_position.z - ball.global_position.z > piece_length * 25.0:
-		var old_building: Node3D = active_buildings.pop_front()
-		old_building.queue_free()
+	while active_trees.size() > 0 and active_trees[0].global_position.z - ball.global_position.z > piece_length * 25.0:
+		var old_tree: Node3D = active_trees.pop_front()
+		old_tree.queue_free()
 
 func _spawn_piece() -> void:
 	var piece: Node3D = track_piece_scene.instantiate()
 	add_child(piece)
 	piece.global_position = Vector3(0, 0, next_z)
 	active_pieces.append(piece)
-	_disable_shadows(piece)
 
 	piece_count += 1
 	pieces_since_obstacle += 1
@@ -62,29 +54,21 @@ func _spawn_piece() -> void:
 		if roll < 0.12 and pieces_since_obstacle >= min_pieces_between_obstacles:
 			var obstacle: Node3D = obstacle_scene.instantiate()
 			add_child(obstacle)
-			obstacle.global_position = Vector3(0, 1.55, next_z)
+			obstacle.global_position = Vector3(0, 1.4, next_z)
 			pieces_since_obstacle = 0
 		elif roll < 0.32:
 			var coin: Node3D = coin_scene.instantiate()
 			add_child(coin)
 			coin.global_position = Vector3(0, 1.5, next_z)
 
-	if piece_count % 5 == 0:
+	if piece_count % 2 == 0:
 		var side: float = -1.0 if rng.randf() < 0.5 else 1.0
-		var chosen: PackedScene = building_scenes[rng.randi_range(0, building_scenes.size() - 1)]
-		var building: Node3D = chosen.instantiate()
-		add_child(building)
-		var x_offset: float = side * rng.randf_range(12.0, 30.0)
-		var scale_factor: float = rng.randf_range(3.5, 8.0)
-		building.global_position = Vector3(x_offset, -1.2, next_z)
-		building.scale = Vector3(scale_factor, scale_factor, scale_factor)
-		_disable_shadows(building)
-		active_buildings.append(building)
+		var tree: Node3D = tree_scene.instantiate()
+		add_child(tree)
+		var x_offset: float = side * rng.randf_range(3.0, 14.0)
+		var scale_factor: float = rng.randf_range(1.0, 2.2)
+		tree.global_position = Vector3(x_offset, -1.2, next_z)
+		tree.scale = Vector3(scale_factor, scale_factor, scale_factor)
+		active_trees.append(tree)
 
 	next_z -= piece_length
-
-func _disable_shadows(node: Node) -> void:
-	if node is MeshInstance3D:
-		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	for child in node.get_children():
-		_disable_shadows(child)

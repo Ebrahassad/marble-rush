@@ -7,23 +7,14 @@
 [ext_resource type="Script" path="res://scripts/environment_theme.gd" id="5"]
 [ext_resource type="Script" path="res://scripts/hud.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/sky_decor.gd" id="7"]
-[ext_resource type="Texture2D" path="res://assets/ground/asphalt_color.jpg" id="9"]
-[ext_resource type="Texture2D" path="res://assets/ground/asphalt_normal.jpg" id="10"]
-[ext_resource type="Texture2D" path="res://assets/ground/asphalt_roughness.jpg" id="11"]
-[ext_resource type="Texture2D" path="res://assets/ground/asphalt_ao.jpg" id="12"]
 [ext_resource type="PackedScene" path="res://scenes/Launcher.tscn" id="8"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_1"]
 size = Vector2(600, 3000)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
-albedo_texture = ExtResource("9")
-normal_enabled = true
-normal_texture = ExtResource("10")
-roughness_texture = ExtResource("11")
-ao_enabled = true
-ao_texture = ExtResource("12")
-uv1_scale = Vector3(150, 750, 1)
+albedo_color = Color(0.08, 0.16, 0.07, 1)
+roughness = 1.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_moon"]
 radius = 6.0

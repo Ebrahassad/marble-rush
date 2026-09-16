@@ -5,9 +5,9 @@ static var cached_material: StandardMaterial3D = null
 func _ready() -> void:
 	if cached_material == null:
 		cached_material = StandardMaterial3D.new()
-		cached_material.albedo_color = Color(0.22, 0.22, 0.25)
-		cached_material.metallic = 0.15
-		cached_material.roughness = 0.75
+		cached_material.albedo_color = Color(0.36, 0.24, 0.14)
+		cached_material.metallic = 0.0
+		cached_material.roughness = 0.95
 	_apply_material_recursive($Model, cached_material)
 
 func _apply_material_recursive(node: Node, mat: Material) -> void:
