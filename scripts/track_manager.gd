@@ -3,15 +3,23 @@ extends Node3D
 @export var track_piece_scene: PackedScene = preload("res://scenes/TrackPiece.tscn")
 @export var obstacle_scene: PackedScene = preload("res://scenes/Obstacle.tscn")
 @export var coin_scene: PackedScene = preload("res://scenes/Coin.tscn")
-@export var mountain_scene: PackedScene = preload("res://scenes/Mountain.tscn")
 @export var piece_length: float = 2.19
 @export var pieces_ahead: int = 50
 @export var min_pieces_between_obstacles: int = 5
 @export var ball_path: NodePath
 
+var building_scenes: Array[PackedScene] = [
+	preload("res://assets/buildings/building-skyscraper-a.glb"),
+	preload("res://assets/buildings/building-skyscraper-b.glb"),
+	preload("res://assets/buildings/building-skyscraper-c.glb"),
+	preload("res://assets/buildings/building-skyscraper-d.glb"),
+	preload("res://assets/buildings/building-skyscraper-e.glb"),
+]
+static var cached_building_material: StandardMaterial3D = null
+
 var ball: Node3D
 var active_pieces: Array[Node3D] = []
-var active_mountains: Array[Node3D] = []
+var active_buildings: Array[Node3D] = []
 var next_z: float = 0.0
 var piece_count: int = 0
 var pieces_since_obstacle: int = 999
@@ -20,6 +28,10 @@ var rng := RandomNumberGenerator.new()
 func _ready() -> void:
 	ball = get_node(ball_path)
 	rng.randomize()
+	if cached_building_material == null:
+		cached_building_material = StandardMaterial3D.new()
+		cached_building_material.albedo_color = Color(0.08, 0.05, 0.15)
+		cached_building_material.roughness = 1.0
 	for i in range(pieces_ahead):
 		_spawn_piece()
 
@@ -36,9 +48,9 @@ func _process(_delta: float) -> void:
 		var old_piece: Node3D = active_pieces.pop_front()
 		old_piece.queue_free()
 
-	while active_mountains.size() > 0 and active_mountains[0].global_position.z - ball.global_position.z > piece_length * 40.0:
-		var old_mountain: Node3D = active_mountains.pop_front()
-		old_mountain.queue_free()
+	while active_buildings.size() > 0 and active_buildings[0].global_position.z - ball.global_position.z > piece_length * 40.0:
+		var old_building: Node3D = active_buildings.pop_front()
+		old_building.queue_free()
 
 func _spawn_piece() -> void:
 	var piece: Node3D = track_piece_scene.instantiate()
@@ -63,12 +75,23 @@ func _spawn_piece() -> void:
 
 	if piece_count % 3 == 0:
 		var side: float = -1.0 if rng.randf() < 0.5 else 1.0
-		var mountain: Node3D = mountain_scene.instantiate()
-		add_child(mountain)
-		var x_offset: float = side * rng.randf_range(14.0, 26.0)
-		var height_scale: float = rng.randf_range(0.6, 1.8)
-		mountain.global_position = Vector3(x_offset, -3.0, next_z)
-		mountain.scale = Vector3(height_scale, height_scale, height_scale)
-		active_mountains.append(mountain)
+		var chosen: PackedScene = building_scenes[rng.randi_range(0, building_scenes.size() - 1)]
+		var building: Node3D = chosen.instantiate()
+		add_child(building)
+		var x_offset: float = side * rng.randf_range(12.0, 30.0)
+		var scale_factor: float = rng.randf_range(3.5, 8.0)
+		building.global_position = Vector3(x_offset, -1.2, next_z)
+		building.scale = Vector3(scale_factor, scale_factor, scale_factor)
+		_apply_building_material(building, cached_building_material)
+		active_buildings.append(building)
 
 	next_z -= piece_length
+
+func _apply_building_material(node: Node, mat: Material) -> void:
+	if node is MeshInstance3D:
+		var mesh_instance: MeshInstance3D = node
+		if mesh_instance.mesh:
+			for i in range(mesh_instance.mesh.get_surface_count()):
+				mesh_instance.set_surface_override_material(i, mat)
+	for child in node.get_children():
+		_apply_building_material(child, mat)
