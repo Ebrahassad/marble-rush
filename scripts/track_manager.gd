@@ -15,7 +15,6 @@ var building_scenes: Array[PackedScene] = [
 	preload("res://assets/buildings/building-skyscraper-d.glb"),
 	preload("res://assets/buildings/building-skyscraper-e.glb"),
 ]
-static var cached_building_material: StandardMaterial3D = null
 
 var ball: Node3D
 var active_pieces: Array[Node3D] = []
@@ -28,10 +27,6 @@ var rng := RandomNumberGenerator.new()
 func _ready() -> void:
 	ball = get_node(ball_path)
 	rng.randomize()
-	if cached_building_material == null:
-		cached_building_material = StandardMaterial3D.new()
-		cached_building_material.albedo_color = Color(0.08, 0.05, 0.15)
-		cached_building_material.roughness = 1.0
 	for i in range(pieces_ahead):
 		_spawn_piece()
 
@@ -82,16 +77,6 @@ func _spawn_piece() -> void:
 		var scale_factor: float = rng.randf_range(3.5, 8.0)
 		building.global_position = Vector3(x_offset, -1.2, next_z)
 		building.scale = Vector3(scale_factor, scale_factor, scale_factor)
-		_apply_building_material(building, cached_building_material)
 		active_buildings.append(building)
 
 	next_z -= piece_length
-
-func _apply_building_material(node: Node, mat: Material) -> void:
-	if node is MeshInstance3D:
-		var mesh_instance: MeshInstance3D = node
-		if mesh_instance.mesh:
-			for i in range(mesh_instance.mesh.get_surface_count()):
-				mesh_instance.set_surface_override_material(i, mat)
-	for child in node.get_children():
-		_apply_building_material(child, mat)
