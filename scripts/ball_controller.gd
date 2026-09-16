@@ -23,15 +23,12 @@ var movement_enabled: bool = false
 
 func _ready() -> void:
 	add_to_group("player")
-	var theme_data: Dictionary = ThemeManager.get_current_theme()
-	var ball_material := StandardMaterial3D.new()
-	ball_material.albedo_color = theme_data.ball_color
-	ball_material.metallic = 0.85
-	ball_material.roughness = 0.15
-	ball_material.emission_enabled = true
-	ball_material.emission = theme_data.ball_emission
-	ball_material.emission_energy_multiplier = 0.3
-	_apply_material_recursive(self, ball_material)
+	var iron_material := StandardMaterial3D.new()
+	iron_material.albedo_color = Color(0.32, 0.33, 0.36)
+	iron_material.metallic = 0.9
+	iron_material.roughness = 0.28
+	iron_material.emission_enabled = false
+	_apply_material_recursive(self, iron_material)
 
 func _apply_material_recursive(node: Node, mat: Material) -> void:
 	if node is MeshInstance3D:

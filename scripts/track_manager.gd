@@ -4,7 +4,7 @@ extends Node3D
 @export var obstacle_scene: PackedScene = preload("res://scenes/Obstacle.tscn")
 @export var coin_scene: PackedScene = preload("res://scenes/Coin.tscn")
 @export var piece_length: float = 2.19
-@export var pieces_ahead: int = 50
+@export var pieces_ahead: int = 35
 @export var min_pieces_between_obstacles: int = 5
 @export var ball_path: NodePath
 
@@ -36,14 +36,14 @@ func _process(_delta: float) -> void:
 
 	if active_pieces.size() > 0:
 		var last_piece_z: float = active_pieces[active_pieces.size() - 1].global_position.z
-		if ball.global_position.z - last_piece_z < piece_length * 40.0:
+		if ball.global_position.z - last_piece_z < piece_length * 25.0:
 			_spawn_piece()
 
-	while active_pieces.size() > 0 and active_pieces[0].global_position.z - ball.global_position.z > piece_length * 40.0:
+	while active_pieces.size() > 0 and active_pieces[0].global_position.z - ball.global_position.z > piece_length * 25.0:
 		var old_piece: Node3D = active_pieces.pop_front()
 		old_piece.queue_free()
 
-	while active_buildings.size() > 0 and active_buildings[0].global_position.z - ball.global_position.z > piece_length * 40.0:
+	while active_buildings.size() > 0 and active_buildings[0].global_position.z - ball.global_position.z > piece_length * 25.0:
 		var old_building: Node3D = active_buildings.pop_front()
 		old_building.queue_free()
 
@@ -52,6 +52,7 @@ func _spawn_piece() -> void:
 	add_child(piece)
 	piece.global_position = Vector3(0, 0, next_z)
 	active_pieces.append(piece)
+	_disable_shadows(piece)
 
 	piece_count += 1
 	pieces_since_obstacle += 1
@@ -68,7 +69,7 @@ func _spawn_piece() -> void:
 			add_child(coin)
 			coin.global_position = Vector3(0, 1.5, next_z)
 
-	if piece_count % 3 == 0:
+	if piece_count % 5 == 0:
 		var side: float = -1.0 if rng.randf() < 0.5 else 1.0
 		var chosen: PackedScene = building_scenes[rng.randi_range(0, building_scenes.size() - 1)]
 		var building: Node3D = chosen.instantiate()
@@ -77,6 +78,13 @@ func _spawn_piece() -> void:
 		var scale_factor: float = rng.randf_range(3.5, 8.0)
 		building.global_position = Vector3(x_offset, -1.2, next_z)
 		building.scale = Vector3(scale_factor, scale_factor, scale_factor)
+		_disable_shadows(building)
 		active_buildings.append(building)
 
 	next_z -= piece_length
+
+func _disable_shadows(node: Node) -> void:
+	if node is MeshInstance3D:
+		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	for child in node.get_children():
+		_disable_shadows(child)
