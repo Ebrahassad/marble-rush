@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/main_menu.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/menu_ball_spin.gd" id="2"]
 
 [sub_resource type="Gradient" id="Gradient_bg"]
 colors = PackedColorArray(0.18, 0.09, 0.32, 1, 0.05, 0.02, 0.1, 1)
@@ -26,6 +27,15 @@ corner_radius_top_right = 18
 corner_radius_bottom_left = 18
 corner_radius_bottom_right = 18
 
+[sub_resource type="SphereMesh" id="SphereMesh_ball"]
+radius = 0.6
+height = 1.2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ball"]
+albedo_color = Color(0.55, 0.56, 0.58, 1)
+metallic = 0.55
+roughness = 0.4
+
 [node name="MainMenu" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -38,15 +48,42 @@ texture = SubResource("GradientTexture2D_bg")
 expand_mode = 1
 stretch_mode = 1
 
+[node name="BallViewportContainer" type="SubViewportContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.06
+anchor_right = 0.5
+anchor_bottom = 0.06
+offset_left = -110.0
+offset_right = 110.0
+offset_top = 0.0
+offset_bottom = 220.0
+stretch = true
+
+[node name="BallViewport" type="SubViewport" parent="BallViewportContainer"]
+transparent_bg = true
+size = Vector2i(220, 220)
+
+[node name="Camera3D" type="Camera3D" parent="BallViewportContainer/BallViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.6)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="BallViewportContainer/BallViewport"]
+transform = Transform3D(0.8, -0.4, 0.4, 0, 0.9, 0.4, -0.5, -0.3, 0.8, 2, 2, 2)
+light_color = Color(1, 0.92, 0.75, 1)
+
+[node name="SpinningBall" type="MeshInstance3D" parent="BallViewportContainer/BallViewport"]
+mesh = SubResource("SphereMesh_ball")
+surface_material_override/0 = SubResource("StandardMaterial3D_ball")
+script = ExtResource("2")
+
 [node name="TitleLabel" type="Label" parent="."]
 anchor_left = 0.5
-anchor_top = 0.26
+anchor_top = 0.32
 anchor_right = 0.5
-anchor_bottom = 0.26
+anchor_bottom = 0.32
 offset_left = -240.0
 offset_right = 240.0
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 68
+theme_override_font_sizes/font_size = 60
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.02, 1)
 theme_override_constants/outline_size = 8
@@ -54,9 +91,9 @@ text = "Marble Rush"
 
 [node name="BestLabel" type="Label" parent="."]
 anchor_left = 0.5
-anchor_top = 0.39
+anchor_top = 0.43
 anchor_right = 0.5
-anchor_bottom = 0.39
+anchor_bottom = 0.43
 offset_left = -150.0
 offset_right = 150.0
 horizontal_alignment = 1
@@ -66,9 +103,9 @@ text = "Best: 0"
 
 [node name="PlayButton" type="Button" parent="."]
 anchor_left = 0.5
-anchor_top = 0.56
+anchor_top = 0.58
 anchor_right = 0.5
-anchor_bottom = 0.56
+anchor_bottom = 0.58
 offset_left = -140.0
 offset_right = 140.0
 offset_top = 0.0
