@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="PackedScene" path="res://assets/track/straight.glb" id="1"]
 [ext_resource type="Script" path="res://scripts/track_piece.gd" id="2"]
@@ -12,6 +12,13 @@ size = Vector3(0.08, 0.06, 2.2)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rail"]
 albedo_color = Color(0.55, 0.4, 0.22, 1)
 roughness = 0.9
+
+[sub_resource type="BoxMesh" id="BoxMesh_berm"]
+size = Vector3(0.6, 0.5, 2.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_berm"]
+albedo_color = Color(0.24, 0.15, 0.09, 1)
+roughness = 1.0
 
 [node name="TrackPiece" type="StaticBody3D"]
 script = ExtResource("2")
@@ -32,3 +39,13 @@ surface_material_override/0 = SubResource("StandardMaterial3D_rail")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.05, 1.12, 0)
 mesh = SubResource("BoxMesh_rail")
 surface_material_override/0 = SubResource("StandardMaterial3D_rail")
+
+[node name="BermLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.9, 0)
+mesh = SubResource("BoxMesh_berm")
+surface_material_override/0 = SubResource("StandardMaterial3D_berm")
+
+[node name="BermRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.9, 0)
+mesh = SubResource("BoxMesh_berm")
+surface_material_override/0 = SubResource("StandardMaterial3D_berm")

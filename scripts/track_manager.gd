@@ -69,6 +69,13 @@ func _spawn_piece() -> void:
 		var scale_factor: float = rng.randf_range(1.0, 2.2)
 		tree.global_position = Vector3(x_offset, -1.2, next_z)
 		tree.scale = Vector3(scale_factor, scale_factor, scale_factor)
+		tree.rotate_y(rng.randf_range(0.0, TAU))
+		var tint := StandardMaterial3D.new()
+		tint.albedo_color = Color(0.08, rng.randf_range(0.26, 0.4), 0.1)
+		tint.roughness = 0.95
+		for leaf_name in ["LeavesLower", "LeavesUpper"]:
+			var leaf: MeshInstance3D = tree.get_node(leaf_name)
+			leaf.set_surface_override_material(0, tint)
 		active_trees.append(tree)
 
 	next_z -= piece_length
