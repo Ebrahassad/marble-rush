@@ -12,6 +12,7 @@ extends RigidBody3D
 @export var fall_death_y: float = -5.0
 @export var jump_threshold: float = 40.0
 @export var fast_fall_threshold: float = 60.0
+@export var track_manager_path: NodePath
 
 var touch_start_x: float = 0.0
 var touch_start_y: float = 0.0
@@ -20,14 +21,16 @@ var is_grounded: bool = false
 var fast_falling: bool = false
 var jump_consumed: bool = false
 var movement_enabled: bool = false
+var track_manager: Node = null
 
 func _ready() -> void:
 	add_to_group("player")
+	if track_manager_path != NodePath():
+		track_manager = get_node(track_manager_path)
 	var iron_material := StandardMaterial3D.new()
-	iron_material.albedo_color = Color(0.55, 0.56, 0.58)
-	iron_material.metallic = 0.55
-	iron_material.roughness = 0.4
-	iron_material.emission_enabled = false
+	iron_material.albedo_color = Color(0.4, 0.41, 0.43)
+	iron_material.metallic = 0.3
+	iron_material.roughness = 0.55
 	_apply_material_recursive(self, iron_material)
 
 func _apply_material_recursive(node: Node, mat: Material) -> void:
@@ -60,9 +63,14 @@ func _physics_process(delta: float) -> void:
 	if linear_velocity.z > -current_max_speed:
 		apply_central_force(Vector3(0, 0, -forward_speed * mass))
 
-	if global_position.x > lane_limit:
+	var center_x: float = 0.0
+	if track_manager != null:
+		center_x = track_manager.get_path_x(global_position.z)
+	var relative_x: float = global_position.x - center_x
+
+	if relative_x > lane_limit:
 		apply_central_force(Vector3(-steer_force * mass, 0, 0))
-	elif global_position.x < -lane_limit:
+	elif relative_x < -lane_limit:
 		apply_central_force(Vector3(steer_force * mass, 0, 0))
 
 	if fast_falling and not is_grounded:

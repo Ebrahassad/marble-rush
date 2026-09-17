@@ -50,6 +50,7 @@ mesh = SubResource("SphereMesh_moon")
 surface_material_override/0 = SubResource("StandardMaterial3D_moon")
 
 [node name="Ball" parent="." instance=ExtResource("1")]
+track_manager_path = NodePath("../TrackManager")
 
 [node name="Launcher" parent="." instance=ExtResource("8")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0.7)

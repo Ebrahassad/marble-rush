@@ -6,6 +6,9 @@ extends Node3D
 @export var piece_length: float = 2.19
 @export var pieces_ahead: int = 35
 @export var min_pieces_between_obstacles: int = 5
+@export var curve_amplitude: float = 3.2
+@export var curve_frequency: float = 0.045
+@export var curve_start_distance: float = 30.0
 @export var ball_path: NodePath
 
 var tree_scenes: Array[PackedScene] = [
@@ -33,6 +36,12 @@ func _ready() -> void:
 	for i in range(pieces_ahead):
 		_spawn_piece()
 
+func get_path_x(z: float) -> float:
+	var dist: float = max(-z, 0.0)
+	if dist < curve_start_distance:
+		return 0.0
+	return sin((dist - curve_start_distance) * curve_frequency) * curve_amplitude
+
 func _process(_delta: float) -> void:
 	if ball == null:
 		return
@@ -55,9 +64,10 @@ func _process(_delta: float) -> void:
 		old_grass.queue_free()
 
 func _spawn_piece() -> void:
+	var path_x: float = get_path_x(next_z)
 	var piece: Node3D = track_piece_scene.instantiate()
 	add_child(piece)
-	piece.global_position = Vector3(0, 0, next_z)
+	piece.global_position = Vector3(path_x, 0, next_z)
 	active_pieces.append(piece)
 
 	piece_count += 1
@@ -68,19 +78,19 @@ func _spawn_piece() -> void:
 		if roll < 0.12 and pieces_since_obstacle >= min_pieces_between_obstacles:
 			var obstacle: Node3D = obstacle_scene.instantiate()
 			add_child(obstacle)
-			obstacle.global_position = Vector3(0, 1.4, next_z)
+			obstacle.global_position = Vector3(path_x, 1.4, next_z)
 			pieces_since_obstacle = 0
 		elif roll < 0.32:
 			var coin: Node3D = coin_scene.instantiate()
 			add_child(coin)
-			coin.global_position = Vector3(0, 1.5, next_z)
+			coin.global_position = Vector3(path_x, 1.5, next_z)
 
 	if piece_count % 2 == 0:
 		var side: float = -1.0 if rng.randf() < 0.5 else 1.0
 		var chosen_tree: PackedScene = tree_scenes[rng.randi_range(0, tree_scenes.size() - 1)]
 		var tree: Node3D = chosen_tree.instantiate()
 		add_child(tree)
-		var x_offset: float = side * rng.randf_range(3.0, 14.0)
+		var x_offset: float = path_x + side * rng.randf_range(3.0, 14.0)
 		var scale_factor: float = rng.randf_range(1.5, 3.0)
 		tree.global_position = Vector3(x_offset, -1.2, next_z)
 		tree.scale = Vector3(scale_factor, scale_factor, scale_factor)
@@ -92,7 +102,7 @@ func _spawn_piece() -> void:
 		var chosen_grass: PackedScene = grass_scenes[rng.randi_range(0, grass_scenes.size() - 1)]
 		var grass: Node3D = chosen_grass.instantiate()
 		add_child(grass)
-		var g_offset: float = g_side * rng.randf_range(1.6, 4.0)
+		var g_offset: float = path_x + g_side * rng.randf_range(1.6, 4.0)
 		var g_scale: float = rng.randf_range(2.0, 4.0)
 		grass.global_position = Vector3(g_offset, -1.2, next_z + rng.randf_range(-1.0, 1.0))
 		grass.scale = Vector3(g_scale, g_scale, g_scale)
