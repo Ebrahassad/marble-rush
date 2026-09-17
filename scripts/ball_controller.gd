@@ -24,9 +24,9 @@ var movement_enabled: bool = false
 func _ready() -> void:
 	add_to_group("player")
 	var iron_material := StandardMaterial3D.new()
-	iron_material.albedo_color = Color(0.32, 0.33, 0.36)
-	iron_material.metallic = 0.9
-	iron_material.roughness = 0.28
+	iron_material.albedo_color = Color(0.55, 0.56, 0.58)
+	iron_material.metallic = 0.55
+	iron_material.roughness = 0.4
 	iron_material.emission_enabled = false
 	_apply_material_recursive(self, iron_material)
 
