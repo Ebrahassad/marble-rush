@@ -3,11 +3,16 @@ extends Node3D
 @export var track_piece_scene: PackedScene = preload("res://scenes/TrackPiece.tscn")
 @export var obstacle_scene: PackedScene = preload("res://scenes/Obstacle.tscn")
 @export var coin_scene: PackedScene = preload("res://scenes/Coin.tscn")
-@export var tree_scene: PackedScene = preload("res://scenes/Tree.tscn")
 @export var piece_length: float = 2.19
 @export var pieces_ahead: int = 35
 @export var min_pieces_between_obstacles: int = 5
 @export var ball_path: NodePath
+
+var tree_scenes: Array[PackedScene] = [
+	preload("res://assets/trees/tree_pineTallA.glb"),
+	preload("res://assets/trees/tree_default.glb"),
+	preload("res://assets/trees/tree_oak.glb"),
+]
 
 var ball: Node3D
 var active_pieces: Array[Node3D] = []
@@ -63,19 +68,14 @@ func _spawn_piece() -> void:
 
 	if piece_count % 2 == 0:
 		var side: float = -1.0 if rng.randf() < 0.5 else 1.0
-		var tree: Node3D = tree_scene.instantiate()
+		var chosen: PackedScene = tree_scenes[rng.randi_range(0, tree_scenes.size() - 1)]
+		var tree: Node3D = chosen.instantiate()
 		add_child(tree)
 		var x_offset: float = side * rng.randf_range(3.0, 14.0)
-		var scale_factor: float = rng.randf_range(1.0, 2.2)
+		var scale_factor: float = rng.randf_range(1.5, 3.0)
 		tree.global_position = Vector3(x_offset, -1.2, next_z)
 		tree.scale = Vector3(scale_factor, scale_factor, scale_factor)
 		tree.rotate_y(rng.randf_range(0.0, TAU))
-		var tint := StandardMaterial3D.new()
-		tint.albedo_color = Color(0.08, rng.randf_range(0.26, 0.4), 0.1)
-		tint.roughness = 0.95
-		for leaf_name in ["LeavesLower", "LeavesUpper"]:
-			var leaf: MeshInstance3D = tree.get_node(leaf_name)
-			leaf.set_surface_override_material(0, tint)
 		active_trees.append(tree)
 
 	next_z -= piece_length
