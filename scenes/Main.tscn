@@ -7,7 +7,6 @@
 [ext_resource type="Script" path="res://scripts/environment_theme.gd" id="5"]
 [ext_resource type="Script" path="res://scripts/hud.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/sky_decor.gd" id="7"]
-[ext_resource type="PackedScene" path="res://scenes/Launcher.tscn" id="8"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_1"]
 size = Vector2(600, 3000)
@@ -52,16 +51,13 @@ surface_material_override/0 = SubResource("StandardMaterial3D_moon")
 [node name="Ball" parent="." instance=ExtResource("1")]
 track_manager_path = NodePath("../TrackManager")
 
-[node name="Launcher" parent="." instance=ExtResource("8")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0.7)
-ball_path = NodePath("../Ball")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 4.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 7.0)
 fov = 85.0
 script = ExtResource("3")
 target_path = NodePath("../Ball")
-offset = Vector3(0, 2.4, 4.2)
+offset = Vector3(0, 3.4, 7.0)
 
 [node name="TrackManager" type="Node3D" parent="."]
 script = ExtResource("4")

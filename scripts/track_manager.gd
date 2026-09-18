@@ -58,13 +58,6 @@ func _process(_delta: float) -> void:
 		var old_grass: Node3D = active_grass.pop_front()
 		old_grass.queue_free()
 
-func _spawn_obstacle_at(lane_x: float, z: float) -> void:
-	var obstacle: Node3D = obstacle_scene.instantiate()
-	add_child(obstacle)
-	obstacle.global_position = Vector3(lane_x, 1.6, z)
-	if rng.randf() < 0.4:
-		obstacle.scale = Vector3(1.0, 2.2, 1.0)
-
 func _spawn_piece() -> void:
 	var piece: Node3D = track_piece_scene.instantiate()
 	add_child(piece)
@@ -76,23 +69,17 @@ func _spawn_piece() -> void:
 
 	if piece_count > 6:
 		var roll: float = rng.randf()
-		if roll < 0.14 and pieces_since_obstacle >= min_pieces_between_obstacles:
-			var pattern: int = rng.randi_range(0, 2)
-			if pattern == 0:
-				_spawn_obstacle_at(0.0, next_z)
-			elif pattern == 1:
-				_spawn_obstacle_at(-lane_offset, next_z)
-				_spawn_obstacle_at(lane_offset, next_z)
-			else:
-				var side: float = -1.0 if rng.randf() < 0.5 else 1.0
-				_spawn_obstacle_at(side * lane_offset, next_z)
-				_spawn_obstacle_at(0.0, next_z)
+		if roll < 0.16 and pieces_since_obstacle >= min_pieces_between_obstacles:
+			var lane: float = float(rng.randi_range(-1, 1)) * lane_offset
+			var obstacle: Node3D = obstacle_scene.instantiate()
+			add_child(obstacle)
+			obstacle.global_position = Vector3(lane, 1.6, next_z)
 			pieces_since_obstacle = 0
-		elif roll < 0.36:
-			var coin_lane: float = (rng.randi_range(-1, 1)) * lane_offset
+		elif roll < 0.38:
+			var coin_lane: float = float(rng.randi_range(-1, 1)) * lane_offset
 			var coin: Node3D = coin_scene.instantiate()
 			add_child(coin)
-			coin.global_position = Vector3(coin_lane, 1.7, next_z)
+			coin.global_position = Vector3(coin_lane, 2.1, next_z)
 
 	if piece_count % 2 == 0:
 		var side: float = -1.0 if rng.randf() < 0.5 else 1.0

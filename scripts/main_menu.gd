@@ -8,6 +8,9 @@ func _ready() -> void:
 	$BestLabel.text = "Best: %d" % GameManager.best_score
 	$LoadingPanel.visible = false
 
+func _on_horses_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/HorseShop.tscn")
+
 func _on_play_pressed() -> void:
 	GameManager.reset()
 	$PlayButton.disabled = true

@@ -14,6 +14,7 @@ boot_splash/bg_color=Color(0.101961, 0.043137, 0.180392, 1)
 ThemeManager="*res://scripts/theme_manager.gd"
 GameManager="*res://scripts/game_manager.gd"
 SFX="*res://scripts/sfx_manager.gd"
+HorseManager="*res://scripts/horse_manager.gd"
 
 [display]
 

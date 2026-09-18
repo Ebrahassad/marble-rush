@@ -13,6 +13,8 @@ extends RigidBody3D
 @export var jump_threshold: float = 40.0
 @export var fast_fall_threshold: float = 60.0
 @export var track_manager_path: NodePath
+@export var model_scale: float = 1.1
+@export var start_delay: float = 1.5
 
 var touch_start_x: float = 0.0
 var touch_start_y: float = 0.0
@@ -22,28 +24,40 @@ var fast_falling: bool = false
 var jump_consumed: bool = false
 var movement_enabled: bool = false
 var track_manager: Node = null
+var anim_player: AnimationPlayer = null
 
 func _ready() -> void:
 	add_to_group("player")
+	axis_lock_angular_x = true
+	axis_lock_angular_y = true
+	axis_lock_angular_z = true
+
 	if track_manager_path != NodePath():
 		track_manager = get_node(track_manager_path)
-	var iron_material := StandardMaterial3D.new()
-	iron_material.albedo_color = Color(0.4, 0.41, 0.43)
-	iron_material.metallic = 0.3
-	iron_material.roughness = 0.55
-	_apply_material_recursive(self, iron_material)
 
-func _apply_material_recursive(node: Node, mat: Material) -> void:
-	if node is MeshInstance3D:
-		var mesh_instance: MeshInstance3D = node
-		if mesh_instance.mesh:
-			for i in range(mesh_instance.mesh.get_surface_count()):
-				mesh_instance.set_surface_override_material(i, mat)
+	var horse_scene: PackedScene = load(HorseManager.get_selected_path())
+	var model: Node3D = horse_scene.instantiate()
+	model.scale = Vector3(model_scale, model_scale, model_scale)
+	add_child(model)
+	anim_player = _find_animation_player(model)
+	if anim_player:
+		anim_player.play("Idle")
+
+	get_tree().create_timer(start_delay).timeout.connect(enable_movement)
+
+func _find_animation_player(node: Node) -> AnimationPlayer:
+	if node is AnimationPlayer:
+		return node
 	for child in node.get_children():
-		_apply_material_recursive(child, mat)
+		var result: AnimationPlayer = _find_animation_player(child)
+		if result:
+			return result
+	return null
 
 func enable_movement() -> void:
 	movement_enabled = true
+	if anim_player:
+		anim_player.play("Run")
 
 func _physics_process(delta: float) -> void:
 	if GameManager.is_game_over:
@@ -55,6 +69,8 @@ func _physics_process(delta: float) -> void:
 	if global_position.y < fall_death_y:
 		GameManager.trigger_game_over()
 		freeze = true
+		if anim_player:
+			anim_player.stop()
 		return
 
 	var distance: float = max(-global_position.z, 0.0)
@@ -121,5 +137,7 @@ func _on_body_entered(body: Node) -> void:
 	if body.is_in_group("obstacles"):
 		GameManager.trigger_game_over()
 		freeze = true
+		if anim_player:
+			anim_player.stop()
 	else:
 		is_grounded = true
