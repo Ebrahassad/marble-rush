@@ -4,17 +4,17 @@
 [ext_resource type="Script" path="res://scripts/track_piece.gd" id="2"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1"]
-size = Vector3(2.2, 0.2, 2.2)
+size = Vector3(3.6, 0.2, 3.6)
 
 [sub_resource type="BoxMesh" id="BoxMesh_rail"]
-size = Vector3(0.08, 0.06, 2.2)
+size = Vector3(0.1, 0.08, 3.6)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rail"]
 albedo_color = Color(0.55, 0.4, 0.22, 1)
 roughness = 0.9
 
 [sub_resource type="BoxMesh" id="BoxMesh_berm"]
-size = Vector3(0.6, 0.5, 2.2)
+size = Vector3(0.6, 0.5, 3.6)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_berm"]
 albedo_color = Color(0.24, 0.15, 0.09, 1)
@@ -24,28 +24,28 @@ roughness = 1.0
 script = ExtResource("2")
 
 [node name="Model" parent="." instance=ExtResource("1")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, 0, 0, 0)
+transform = Transform3D(3.6, 0, 0, 0, 3.6, 0, 0, 0, 3.6, 0, 0, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 shape = SubResource("BoxShape3D_1")
 
 [node name="RailLeft" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.05, 1.12, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.75, 1.82, 0)
 mesh = SubResource("BoxMesh_rail")
 surface_material_override/0 = SubResource("StandardMaterial3D_rail")
 
 [node name="RailRight" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.05, 1.12, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.75, 1.82, 0)
 mesh = SubResource("BoxMesh_rail")
 surface_material_override/0 = SubResource("StandardMaterial3D_rail")
 
 [node name="BermLeft" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.9, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.3, 1.55, 0)
 mesh = SubResource("BoxMesh_berm")
 surface_material_override/0 = SubResource("StandardMaterial3D_berm")
 
 [node name="BermRight" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.9, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3, 1.55, 0)
 mesh = SubResource("BoxMesh_berm")
 surface_material_override/0 = SubResource("StandardMaterial3D_berm")

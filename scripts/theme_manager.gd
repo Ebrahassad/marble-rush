@@ -5,8 +5,8 @@ var themes: Dictionary = {
 		"ball_color": Color(0.83, 0.68, 0.21),
 		"ball_emission": Color(0.6, 0.45, 0.05),
 		"track_color": Color(0.16, 0.08, 0.27),
-		"sky_top": Color(0.25, 0.5, 0.85),
-		"sky_horizon": Color(0.95, 0.78, 0.55),
+		"sky_top": Color(0.15, 0.45, 0.85),
+		"sky_horizon": Color(0.75, 0.85, 0.95),
 	}
 }
 
