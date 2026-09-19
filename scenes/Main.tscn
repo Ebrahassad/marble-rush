@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/Ball.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/TrackPiece.tscn" id="2"]
@@ -6,7 +6,6 @@
 [ext_resource type="Script" path="res://scripts/track_manager.gd" id="4"]
 [ext_resource type="Script" path="res://scripts/environment_theme.gd" id="5"]
 [ext_resource type="Script" path="res://scripts/hud.gd" id="6"]
-[ext_resource type="Script" path="res://scripts/sky_decor.gd" id="7"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_1"]
 size = Vector2(600, 3000)
@@ -14,16 +13,6 @@ size = Vector2(600, 3000)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
 albedo_color = Color(0.08, 0.16, 0.07, 1)
 roughness = 1.0
-
-[sub_resource type="SphereMesh" id="SphereMesh_moon"]
-radius = 6.0
-height = 12.0
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_moon"]
-albedo_color = Color(1, 0.95, 0.85, 1)
-emission_enabled = true
-emission = Color(1, 0.92, 0.75, 1)
-emission_energy_multiplier = 1.5
 
 [node name="Main" type="Node3D"]
 
@@ -40,24 +29,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.2, -1400)
 mesh = SubResource("PlaneMesh_1")
 surface_material_override/0 = SubResource("StandardMaterial3D_ground")
 
-[node name="SkyDecor" type="Node3D" parent="."]
-script = ExtResource("7")
-
-[node name="Moon" type="MeshInstance3D" parent="SkyDecor"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 50, -140)
-mesh = SubResource("SphereMesh_moon")
-surface_material_override/0 = SubResource("StandardMaterial3D_moon")
-
 [node name="Ball" parent="." instance=ExtResource("1")]
 track_manager_path = NodePath("../TrackManager")
 
-
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 7.0)
-fov = 85.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, 8.5)
+fov = 80.0
 script = ExtResource("3")
 target_path = NodePath("../Ball")
-offset = Vector3(0, 3.4, 7.0)
+offset = Vector3(0, 4.0, 8.5)
 
 [node name="TrackManager" type="Node3D" parent="."]
 script = ExtResource("4")

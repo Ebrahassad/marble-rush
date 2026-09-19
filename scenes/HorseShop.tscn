@@ -24,53 +24,63 @@ stretch_mode = 0
 
 [node name="TitleLabel" type="Label" parent="."]
 anchor_left = 0.5
-anchor_top = 0.12
+anchor_top = 0.04
 anchor_right = 0.5
-anchor_bottom = 0.12
+anchor_bottom = 0.04
 offset_left = -200.0
 offset_right = 200.0
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 40
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 text = "Choose Horse"
 
-[node name="Horse1" type="Button" parent="."]
+[node name="PreviewViewportContainer" type="SubViewportContainer" parent="."]
 anchor_left = 0.5
-anchor_top = 0.3
+anchor_top = 0.12
 anchor_right = 0.5
-anchor_bottom = 0.3
+anchor_bottom = 0.12
 offset_left = -180.0
 offset_right = 180.0
 offset_top = 0.0
-offset_bottom = 95.0
-theme_override_font_sizes/font_size = 32
+offset_bottom = 320.0
+stretch = true
+
+[node name="PreviewViewport" type="SubViewport" parent="PreviewViewportContainer"]
+transparent_bg = true
+size = Vector2i(360, 320)
+
+[node name="Camera3D" type="Camera3D" parent="PreviewViewportContainer/PreviewViewport"]
+transform = Transform3D(1, 0, 0, 0, 0.97, 0.26, 0, -0.26, 0.97, 0, 0.8, 4.2)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="PreviewViewportContainer/PreviewViewport"]
+transform = Transform3D(0.8, -0.4, 0.4, 0, 0.9, 0.4, -0.5, -0.3, 0.8, 2, 2, 2)
+light_color = Color(1, 0.92, 0.75, 1)
+
+[node name="Horse1" type="Button" parent="."]
+anchor_left = 0.5
+anchor_top = 0.48
+anchor_right = 0.5
+anchor_bottom = 0.48
+offset_left = -180.0
+offset_right = 180.0
+offset_top = 0.0
+offset_bottom = 85.0
+theme_override_font_sizes/font_size = 30
 text = "Horse 1"
 
 [node name="Horse2" type="Button" parent="."]
 anchor_left = 0.5
-anchor_top = 0.44
+anchor_top = 0.6
 anchor_right = 0.5
-anchor_bottom = 0.44
+anchor_bottom = 0.6
 offset_left = -180.0
 offset_right = 180.0
 offset_top = 0.0
-offset_bottom = 95.0
-theme_override_font_sizes/font_size = 32
+offset_bottom = 85.0
+theme_override_font_sizes/font_size = 30
 text = "Horse 2"
 
 [node name="Horse3" type="Button" parent="."]
-anchor_left = 0.5
-anchor_top = 0.58
-anchor_right = 0.5
-anchor_bottom = 0.58
-offset_left = -180.0
-offset_right = 180.0
-offset_top = 0.0
-offset_bottom = 95.0
-theme_override_font_sizes/font_size = 32
-text = "Horse 3"
-
-[node name="Horse4" type="Button" parent="."]
 anchor_left = 0.5
 anchor_top = 0.72
 anchor_right = 0.5
@@ -78,20 +88,32 @@ anchor_bottom = 0.72
 offset_left = -180.0
 offset_right = 180.0
 offset_top = 0.0
-offset_bottom = 95.0
-theme_override_font_sizes/font_size = 32
+offset_bottom = 85.0
+theme_override_font_sizes/font_size = 30
+text = "Horse 3"
+
+[node name="Horse4" type="Button" parent="."]
+anchor_left = 0.5
+anchor_top = 0.84
+anchor_right = 0.5
+anchor_bottom = 0.84
+offset_left = -180.0
+offset_right = 180.0
+offset_top = 0.0
+offset_bottom = 85.0
+theme_override_font_sizes/font_size = 30
 text = "Horse 4"
 
 [node name="BackButton" type="Button" parent="."]
 anchor_left = 0.5
-anchor_top = 0.87
+anchor_top = 0.94
 anchor_right = 0.5
-anchor_bottom = 0.87
-offset_left = -120.0
-offset_right = 120.0
+anchor_bottom = 0.94
+offset_left = -110.0
+offset_right = 110.0
 offset_top = 0.0
-offset_bottom = 75.0
-theme_override_font_sizes/font_size = 26
+offset_bottom = 65.0
+theme_override_font_sizes/font_size = 24
 text = "Back"
 
 [connection signal="pressed" from="Horse1" to="." method="_on_horse1_pressed"]

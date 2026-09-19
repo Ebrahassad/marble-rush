@@ -8,12 +8,12 @@ extends RigidBody3D
 @export var jump_impulse: float = 6.0
 @export var fast_fall_force: float = 25.0
 @export var slam_impulse: float = 4.0
-@export var lane_limit: float = 1.5
+@export var lane_limit: float = 1.6
 @export var fall_death_y: float = -5.0
 @export var jump_threshold: float = 40.0
 @export var fast_fall_threshold: float = 60.0
 @export var track_manager_path: NodePath
-@export var model_scale: float = 1.1
+@export var model_scale: float = 1.6
 @export var start_delay: float = 1.5
 
 var touch_start_x: float = 0.0
@@ -38,10 +38,10 @@ func _ready() -> void:
 	var horse_scene: PackedScene = load(HorseManager.get_selected_path())
 	var model: Node3D = horse_scene.instantiate()
 	model.scale = Vector3(model_scale, model_scale, model_scale)
+	model.rotate_y(PI)
 	add_child(model)
 	anim_player = _find_animation_player(model)
-	if anim_player:
-		anim_player.play("Idle")
+	_play_animation_containing("idle")
 
 	get_tree().create_timer(start_delay).timeout.connect(enable_movement)
 
@@ -54,10 +54,17 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 			return result
 	return null
 
+func _play_animation_containing(keyword: String) -> void:
+	if anim_player == null:
+		return
+	for anim_name in anim_player.get_animation_list():
+		if keyword.to_lower() in anim_name.to_lower():
+			anim_player.play(anim_name)
+			return
+
 func enable_movement() -> void:
 	movement_enabled = true
-	if anim_player:
-		anim_player.play("Run")
+	_play_animation_containing("run")
 
 func _physics_process(delta: float) -> void:
 	if GameManager.is_game_over:

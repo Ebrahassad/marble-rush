@@ -17,6 +17,7 @@ func _ready() -> void:
 	new_environment.sky = sky
 	new_environment.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	new_environment.ambient_light_energy = 0.65
+	new_environment.fog_sky_affect = 0.0
 
 	new_environment.fog_enabled = true
 	new_environment.fog_light_color = theme_data.sky_horizon
