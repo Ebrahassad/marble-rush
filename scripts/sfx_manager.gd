@@ -9,6 +9,10 @@ func play_jump() -> void:
 	_play(jump_sound)
 
 
+func play_apple() -> void:
+	_play(coin_sound)
+
+
 func play_coin() -> void:
 	_play(coin_sound)
 
@@ -18,6 +22,8 @@ func play_gameover() -> void:
 
 
 func _play(stream: AudioStream) -> void:
+	if stream == null:
+		return
 	var player := AudioStreamPlayer.new()
 	add_child(player)
 	player.stream = stream

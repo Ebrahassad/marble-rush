@@ -1,33 +1,16 @@
 extends CharacterBody3D
 
-# إعدادات الحركة لـ "جالوب - Gallop"
-var gallop_speed = 10.0  # سرعة الجري للأمام
-var strafe_speed = 5.0  # سرعة الحركة الجانبية
-var jump_force = 6.0  # قوة القفز
-var gravity = 9.8  # الجاذبية
+@export var speed: float = 10.0
+@export var jump_impulse: float = 8.5
+@export var gravity: float = 22.0
 
-var vertical_velocity = 0.0
-
-
-func _physics_process(delta):
-	# 1. حساب الجاذبية
+func _physics_process(delta: float) -> void:
 	if not is_on_floor():
-		vertical_velocity -= gravity * delta
-	else:
-		vertical_velocity = 0.0
+		velocity.y -= gravity * delta
 
-	# 2. إدخال المستخدم للحركة الجانبية (يمين/يسار)
-	var horizontal_input = Input.get_axis("ui_left", "ui_right")
-	var horizontal_velocity = horizontal_input * strafe_speed
+	if (Input.is_action_just_pressed("ui_accept") or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)) and is_on_floor():
+		velocity.y = jump_impulse
 
-	# 3. إدخال المستخدم للقفز
-	if is_on_floor() and Input.is_action_just_pressed("ui_accept"):  # افترض Space للقفز
-		vertical_velocity = jump_force
+	velocity.z = -speed
 
-	# 4. تجميع السرعات
-	velocity.x = horizontal_velocity
-	velocity.y = vertical_velocity
-	velocity.z = gallop_speed
-
-	# 5. تحريك الكائن وتطبيق الفيزياء
 	move_and_slide()

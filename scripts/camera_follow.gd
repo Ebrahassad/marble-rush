@@ -11,8 +11,10 @@ var smoothed_y: float = 0.0
 
 
 func _ready() -> void:
-	target = get_node(target_path)
-	smoothed_y = target.global_position.y
+	if target_path != null and not target_path.is_empty():
+		target = get_node_or_null(target_path)
+	if target != null:
+		smoothed_y = target.global_position.y
 
 
 func _process(delta: float) -> void:

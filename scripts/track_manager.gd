@@ -2,7 +2,7 @@ extends Node3D
 
 @export var track_piece_scene: PackedScene = preload("res://scenes/TrackPiece.tscn")
 @export var obstacle_scene: PackedScene = preload("res://scenes/Obstacle.tscn")
-@export var coin_scene: PackedScene = preload("res://scenes/Coin.tscn")
+@export var apple_scene: PackedScene = preload("res://scenes/Coin.tscn")
 @export var piece_length: float = 4.18
 @export var pieces_ahead: int = 35
 @export var min_pieces_between_obstacles: int = 5
@@ -30,7 +30,10 @@ var rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
-	ball = get_node(ball_path)
+	if ResourceLoader.exists("res://scenes/Apple.tscn"):
+		apple_scene = load("res://scenes/Apple.tscn")
+
+	ball = get_node_or_null(ball_path)
 	rng.randomize()
 	for i in range(pieces_ahead):
 		_spawn_piece()
@@ -89,10 +92,10 @@ func _spawn_piece() -> void:
 			obstacle.global_position = Vector3(lane, 1.87, next_z)
 			pieces_since_obstacle = 0
 		elif roll < 0.38:
-			var coin_lane: float = float(rng.randi_range(-1, 1)) * lane_offset
-			var coin: Node3D = coin_scene.instantiate()
-			add_child(coin)
-			coin.global_position = Vector3(coin_lane, 2.6, next_z)
+			var apple_lane: float = float(rng.randi_range(-1, 1)) * lane_offset
+			var apple: Node3D = apple_scene.instantiate()
+			add_child(apple)
+			apple.global_position = Vector3(apple_lane, 2.6, next_z)
 
 	if piece_count % 2 == 0:
 		var side: float = -1.0 if rng.randf() < 0.5 else 1.0
