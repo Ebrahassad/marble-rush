@@ -1,0 +1,6 @@
+
+--- 3D Assets Credits ---
+Obstacle Model: "Show jumping | Horse jumping obstacles"
+Author: Every 3D (https://sketchfab.com/Every_3D)
+Source: https://sketchfab.com/3d-models/show-jumping-horse-jumping-obstacles-67ff46cf20504428a1f7cf7c2e73ed3d
+License: CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
