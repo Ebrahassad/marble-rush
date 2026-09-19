@@ -8,6 +8,7 @@ var horse_paths: Array[String] = [
 	"res://assets/horses/horse-03.glb",
 	"res://assets/horses/horse-04.glb",
 ]
+var horse_names: Array[String] = ["Thunder", "Blaze", "Storm", "Shadow"]
 
 func _ready() -> void:
 	_load()

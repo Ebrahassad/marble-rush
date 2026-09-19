@@ -1,11 +1,11 @@
 extends RigidBody3D
 
-@export var forward_speed: float = 4.0
 @export var base_max_forward_speed: float = 8.0
 @export var difficulty_ramp: float = 0.012
 @export var max_speed_cap: float = 20.0
-@export var steer_force: float = 18.0
-@export var jump_impulse: float = 6.0
+@export var speed_ramp_rate: float = 0.12
+@export var steer_force: float = 22.0
+@export var jump_impulse: float = 6.5
 @export var fast_fall_force: float = 25.0
 @export var slam_impulse: float = 4.0
 @export var lane_limit: float = 1.6
@@ -13,7 +13,7 @@ extends RigidBody3D
 @export var jump_threshold: float = 40.0
 @export var fast_fall_threshold: float = 60.0
 @export var track_manager_path: NodePath
-@export var model_scale: float = 1.6
+@export var model_scale: float = 2.0
 @export var start_delay: float = 1.5
 
 var touch_start_x: float = 0.0
@@ -83,8 +83,8 @@ func _physics_process(delta: float) -> void:
 	var distance: float = max(-global_position.z, 0.0)
 	var current_max_speed: float = min(base_max_forward_speed + distance * difficulty_ramp, max_speed_cap)
 
-	if linear_velocity.z > -current_max_speed:
-		apply_central_force(Vector3(0, 0, -forward_speed * mass))
+	var new_z_velocity: float = lerp(linear_velocity.z, -current_max_speed, speed_ramp_rate)
+	linear_velocity.z = new_z_velocity
 
 	var center_x: float = 0.0
 	if track_manager != null:

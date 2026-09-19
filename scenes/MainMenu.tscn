@@ -1,7 +1,6 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/main_menu.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/menu_ball_spin.gd" id="2"]
 
 [sub_resource type="Gradient" id="Gradient_bg"]
 colors = PackedColorArray(0.18, 0.09, 0.32, 1, 0.05, 0.02, 0.1, 1)
@@ -27,15 +26,6 @@ corner_radius_top_right = 22
 corner_radius_bottom_left = 22
 corner_radius_bottom_right = 22
 
-[sub_resource type="SphereMesh" id="SphereMesh_ball"]
-radius = 0.6
-height = 1.2
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ball"]
-albedo_color = Color(0.4, 0.41, 0.43, 1)
-metallic = 0.3
-roughness = 0.55
-
 [node name="MainMenu" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -48,38 +38,11 @@ texture = SubResource("GradientTexture2D_bg")
 expand_mode = 1
 stretch_mode = 0
 
-[node name="BallViewportContainer" type="SubViewportContainer" parent="."]
-anchor_left = 0.5
-anchor_top = 0.05
-anchor_right = 0.5
-anchor_bottom = 0.05
-offset_left = -150.0
-offset_right = 150.0
-offset_top = 0.0
-offset_bottom = 300.0
-stretch = true
-
-[node name="BallViewport" type="SubViewport" parent="BallViewportContainer"]
-transparent_bg = true
-size = Vector2i(300, 300)
-
-[node name="Camera3D" type="Camera3D" parent="BallViewportContainer/BallViewport"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.6)
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="BallViewportContainer/BallViewport"]
-transform = Transform3D(0.8, -0.4, 0.4, 0, 0.9, 0.4, -0.5, -0.3, 0.8, 2, 2, 2)
-light_color = Color(1, 0.92, 0.75, 1)
-
-[node name="SpinningBall" type="MeshInstance3D" parent="BallViewportContainer/BallViewport"]
-mesh = SubResource("SphereMesh_ball")
-surface_material_override/0 = SubResource("StandardMaterial3D_ball")
-script = ExtResource("2")
-
 [node name="TitleLabel" type="Label" parent="."]
 anchor_left = 0.5
-anchor_top = 0.34
+anchor_top = 0.22
 anchor_right = 0.5
-anchor_bottom = 0.34
+anchor_bottom = 0.22
 offset_left = -260.0
 offset_right = 260.0
 horizontal_alignment = 1
@@ -91,9 +54,9 @@ text = "Marble Rush"
 
 [node name="BestLabel" type="Label" parent="."]
 anchor_left = 0.5
-anchor_top = 0.45
+anchor_top = 0.34
 anchor_right = 0.5
-anchor_bottom = 0.45
+anchor_bottom = 0.34
 offset_left = -180.0
 offset_right = 180.0
 horizontal_alignment = 1
@@ -103,9 +66,9 @@ text = "Best: 0"
 
 [node name="PlayButton" type="Button" parent="."]
 anchor_left = 0.5
-anchor_top = 0.6
+anchor_top = 0.48
 anchor_right = 0.5
-anchor_bottom = 0.6
+anchor_bottom = 0.48
 offset_left = -170.0
 offset_right = 170.0
 offset_top = 0.0
@@ -117,6 +80,18 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_play")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_play_pressed")
 text = "PLAY"
 
+[node name="HorsesButton" type="Button" parent="."]
+anchor_left = 0.5
+anchor_top = 0.6
+anchor_right = 0.5
+anchor_bottom = 0.6
+offset_left = -170.0
+offset_right = 170.0
+offset_top = 0.0
+offset_bottom = 95.0
+theme_override_font_sizes/font_size = 32
+text = "Horses"
+
 [node name="LoadingPanel" type="Control" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -124,39 +99,27 @@ visible = false
 
 [node name="LoadingLabel" type="Label" parent="LoadingPanel"]
 anchor_left = 0.5
-anchor_top = 0.7
+anchor_top = 0.8
 anchor_right = 0.5
-anchor_bottom = 0.7
-offset_left = -130.0
-offset_right = 130.0
+anchor_bottom = 0.8
+offset_left = -150.0
+offset_right = 150.0
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 38
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 text = "Loading..."
 
 [node name="LoadingBar" type="ProgressBar" parent="LoadingPanel"]
 anchor_left = 0.5
-anchor_top = 0.77
+anchor_top = 0.87
 anchor_right = 0.5
-anchor_bottom = 0.77
-offset_left = -200.0
-offset_right = 200.0
+anchor_bottom = 0.87
+offset_left = -320.0
+offset_right = 320.0
 offset_top = 0.0
-offset_bottom = 40.0
+offset_bottom = 50.0
 max_value = 100.0
 value = 0.0
-
-[node name="HorsesButton" type="Button" parent="."]
-anchor_left = 0.5
-anchor_top = 0.73
-anchor_right = 0.5
-anchor_bottom = 0.73
-offset_left = -140.0
-offset_right = 140.0
-offset_top = 0.0
-offset_bottom = 80.0
-theme_override_font_sizes/font_size = 28
-text = "Horses"
 
 [connection signal="pressed" from="PlayButton" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="HorsesButton" to="." method="_on_horses_pressed"]

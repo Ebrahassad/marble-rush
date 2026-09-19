@@ -8,14 +8,14 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if preview_model:
-		preview_model.rotate_y(0.8 * delta)
+		preview_model.rotate_y(0.7 * delta)
 
 func _update_buttons() -> void:
 	for i in range(4):
 		var btn: Button = get_node("Horse%d" % (i + 1))
-		var label: String = "Horse %d" % (i + 1)
+		var label: String = HorseManager.horse_names[i]
 		if i == HorseManager.selected_horse:
-			label += "  (Selected)"
+			label += "  ★"
 		btn.text = label
 
 func _load_preview(index: int) -> void:
@@ -24,9 +24,9 @@ func _load_preview(index: int) -> void:
 		preview_model = null
 	var horse_scene: PackedScene = load(HorseManager.horse_paths[index])
 	preview_model = horse_scene.instantiate()
-	preview_model.scale = Vector3(0.9, 0.9, 0.9)
-	preview_model.position = Vector3(0, -1.1, 0)
-	$PreviewViewportContainer/PreviewViewport.add_child(preview_model)
+	preview_model.scale = Vector3(1.1, 1.1, 1.1)
+	preview_model.position = Vector3(0, -1.3, 0)
+	$StableViewportContainer/StableViewport/PreviewAnchor.add_child(preview_model)
 	var anim_player: AnimationPlayer = _find_animation_player(preview_model)
 	if anim_player:
 		for anim_name in anim_player.get_animation_list():

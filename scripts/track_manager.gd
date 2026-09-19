@@ -79,7 +79,7 @@ func _spawn_piece() -> void:
 			var coin_lane: float = float(rng.randi_range(-1, 1)) * lane_offset
 			var coin: Node3D = coin_scene.instantiate()
 			add_child(coin)
-			coin.global_position = Vector3(coin_lane, 2.4, next_z)
+			coin.global_position = Vector3(coin_lane, 2.6, next_z)
 
 	if piece_count % 2 == 0:
 		var side: float = -1.0 if rng.randf() < 0.5 else 1.0
@@ -87,7 +87,7 @@ func _spawn_piece() -> void:
 		var tree: Node3D = chosen_tree.instantiate()
 		add_child(tree)
 		var x_offset: float = side * rng.randf_range(5.0, 18.0)
-		var scale_factor: float = rng.randf_range(1.5, 3.0)
+		var scale_factor: float = rng.randf_range(2.5, 5.0)
 		tree.global_position = Vector3(x_offset, -1.2, next_z)
 		tree.scale = Vector3(scale_factor, scale_factor, scale_factor)
 		tree.rotate_y(rng.randf_range(0.0, TAU))
@@ -99,7 +99,7 @@ func _spawn_piece() -> void:
 		var grass: Node3D = chosen_grass.instantiate()
 		add_child(grass)
 		var g_offset: float = g_side * rng.randf_range(2.8, 6.0)
-		var g_scale: float = rng.randf_range(2.0, 4.0)
+		var g_scale: float = rng.randf_range(3.0, 6.0)
 		grass.global_position = Vector3(g_offset, -1.2, next_z + rng.randf_range(-1.0, 1.0))
 		grass.scale = Vector3(g_scale, g_scale, g_scale)
 		grass.rotate_y(rng.randf_range(0.0, TAU))
