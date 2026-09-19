@@ -27,6 +27,7 @@ var elapsed_since_ready: float = 0.0
 var track_manager: Node = null
 var anim_player: AnimationPlayer = null
 
+
 func _ready() -> void:
 	add_to_group("player")
 	axis_lock_angular_x = true
@@ -44,6 +45,7 @@ func _ready() -> void:
 	anim_player = _find_animation_player(model)
 	_play_animation_containing("idle")
 
+
 func _find_animation_player(node: Node) -> AnimationPlayer:
 	if node is AnimationPlayer:
 		return node
@@ -53,6 +55,7 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 			return result
 	return null
 
+
 func _play_animation_containing(keyword: String) -> void:
 	if anim_player == null:
 		return
@@ -61,11 +64,13 @@ func _play_animation_containing(keyword: String) -> void:
 			anim_player.play(anim_name)
 			return
 
+
 func enable_movement() -> void:
 	if movement_enabled:
 		return
 	movement_enabled = true
 	_play_animation_containing("run")
+
 
 func _physics_process(delta: float) -> void:
 	if GameManager.is_game_over:
@@ -85,7 +90,9 @@ func _physics_process(delta: float) -> void:
 		return
 
 	var distance: float = max(-global_position.z, 0.0)
-	var current_max_speed: float = min(base_max_forward_speed + distance * difficulty_ramp, max_speed_cap)
+	var current_max_speed: float = min(
+		base_max_forward_speed + distance * difficulty_ramp, max_speed_cap
+	)
 	linear_velocity.z = lerp(linear_velocity.z, -current_max_speed, speed_ramp_rate)
 
 	var center_x: float = 0.0
@@ -100,6 +107,7 @@ func _physics_process(delta: float) -> void:
 
 	if fast_falling and not is_grounded:
 		apply_central_force(Vector3(0, -fast_fall_force * mass, 0))
+
 
 func _input(event: InputEvent) -> void:
 	if GameManager.is_game_over or not movement_enabled:
@@ -135,12 +143,14 @@ func _input(event: InputEvent) -> void:
 			apply_central_force(Vector3(direction * steer_force * mass, 0, 0))
 			touch_start_x = event.position.x
 
+
 func _jump() -> void:
 	if is_grounded:
 		apply_central_impulse(Vector3(0, jump_impulse * mass, 0))
 		is_grounded = false
 		jump_consumed = true
 		SFX.play_jump()
+
 
 func _on_body_entered(body: Node) -> void:
 	if body.is_in_group("obstacles"):

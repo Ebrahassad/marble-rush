@@ -28,14 +28,17 @@ var piece_count: int = 0
 var pieces_since_obstacle: int = 999
 var rng := RandomNumberGenerator.new()
 
+
 func _ready() -> void:
 	ball = get_node(ball_path)
 	rng.randomize()
 	for i in range(pieces_ahead):
 		_spawn_piece()
 
+
 func get_path_x(_z: float) -> float:
 	return 0.0
+
 
 func _process(_delta: float) -> void:
 	if ball == null:
@@ -46,17 +49,27 @@ func _process(_delta: float) -> void:
 		if ball.global_position.z - last_piece_z < piece_length * 25.0:
 			_spawn_piece()
 
-	while active_pieces.size() > 0 and active_pieces[0].global_position.z - ball.global_position.z > piece_length * 25.0:
+	while (
+		active_pieces.size() > 0
+		and active_pieces[0].global_position.z - ball.global_position.z > piece_length * 25.0
+	):
 		var old_piece: Node3D = active_pieces.pop_front()
 		old_piece.queue_free()
 
-	while active_trees.size() > 0 and active_trees[0].global_position.z - ball.global_position.z > piece_length * 25.0:
+	while (
+		active_trees.size() > 0
+		and active_trees[0].global_position.z - ball.global_position.z > piece_length * 25.0
+	):
 		var old_tree: Node3D = active_trees.pop_front()
 		old_tree.queue_free()
 
-	while active_grass.size() > 0 and active_grass[0].global_position.z - ball.global_position.z > piece_length * 25.0:
+	while (
+		active_grass.size() > 0
+		and active_grass[0].global_position.z - ball.global_position.z > piece_length * 25.0
+	):
 		var old_grass: Node3D = active_grass.pop_front()
 		old_grass.queue_free()
+
 
 func _spawn_piece() -> void:
 	var piece: Node3D = track_piece_scene.instantiate()

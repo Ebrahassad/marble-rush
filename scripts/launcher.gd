@@ -8,6 +8,7 @@ extends Node3D
 var ball: RigidBody3D
 var has_launched: bool = false
 
+
 func _ready() -> void:
 	ball = get_node(ball_path)
 	var barrel: Node3D = $Barrel
@@ -17,6 +18,7 @@ func _ready() -> void:
 	tween.tween_property(barrel, "position:z", original_z + recoil_amount, recoil_time)
 	tween.tween_callback(_fire)
 	tween.tween_property(barrel, "position:z", original_z, 0.2)
+
 
 func _fire() -> void:
 	if has_launched or ball == null:

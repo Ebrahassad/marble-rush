@@ -9,9 +9,11 @@ extends Camera3D
 var target: Node3D
 var smoothed_y: float = 0.0
 
+
 func _ready() -> void:
 	target = get_node(target_path)
 	smoothed_y = target.global_position.y
+
 
 func _process(delta: float) -> void:
 	if target == null:
@@ -27,8 +29,6 @@ func _process(delta: float) -> void:
 	global_position = global_position.lerp(desired_position, follow_speed * delta)
 
 	var look_target: Vector3 = Vector3(
-		target.global_position.x,
-		smoothed_y,
-		target.global_position.z - look_ahead_distance
+		target.global_position.x, smoothed_y, target.global_position.z - look_ahead_distance
 	)
 	look_at(look_target, Vector3.UP)

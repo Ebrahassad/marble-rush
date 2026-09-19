@@ -10,21 +10,26 @@ var horse_paths: Array[String] = [
 ]
 var horse_names: Array[String] = ["Thunder", "Blaze", "Storm", "Shadow"]
 
+
 func _ready() -> void:
 	_load()
+
 
 func get_selected_path() -> String:
 	return horse_paths[selected_horse]
 
+
 func select_horse(index: int) -> void:
 	selected_horse = clamp(index, 0, horse_paths.size() - 1)
 	_save()
+
 
 func _load() -> void:
 	if FileAccess.file_exists(SAVE_PATH):
 		var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
 		selected_horse = file.get_32()
 		file.close()
+
 
 func _save() -> void:
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)

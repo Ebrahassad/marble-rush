@@ -1,0 +1,733 @@
+
+
+/* ==================== ./scripts/ball_controller.gd ==================== */
+
+extends RigidBody3D
+
+@export var base_max_forward_speed: float = 8.0
+@export var difficulty_ramp: float = 0.012
+@export var max_speed_cap: float = 20.0
+@export var speed_ramp_rate: float = 0.12
+@export var steer_force: float = 22.0
+@export var jump_impulse: float = 6.5
+@export var fast_fall_force: float = 25.0
+@export var slam_impulse: float = 4.0
+@export var lane_limit: float = 1.6
+@export var fall_death_y: float = -5.0
+@export var jump_threshold: float = 40.0
+@export var fast_fall_threshold: float = 60.0
+@export var track_manager_path: NodePath
+@export var model_scale: float = 2.0
+@export var start_delay: float = 1.5
+
+var touch_start_x: float = 0.0
+var touch_start_y: float = 0.0
+var is_dragging: bool = false
+var is_grounded: bool = false
+var fast_falling: bool = false
+var jump_consumed: bool = false
+var movement_enabled: bool = false
+var elapsed_since_ready: float = 0.0
+var track_manager: Node = null
+var anim_player: AnimationPlayer = null
+
+func _ready() -> void:
+	add_to_group("player")
+	axis_lock_angular_x = true
+	axis_lock_angular_y = true
+	axis_lock_angular_z = true
+
+	if track_manager_path != NodePath():
+		track_manager = get_node(track_manager_path)
+
+	var horse_scene: PackedScene = load(HorseManager.get_selected_path())
+	var model: Node3D = horse_scene.instantiate()
+	model.scale = Vector3(model_scale, model_scale, model_scale)
+	model.rotate_y(PI)
+	add_child(model)
+	anim_player = _find_animation_player(model)
+	_play_animation_containing("idle")
+
+func _find_animation_player(node: Node) -> AnimationPlayer:
+	if node is AnimationPlayer:
+		return node
+	for child in node.get_children():
+		var result: AnimationPlayer = _find_animation_player(child)
+		if result:
+			return result
+	return null
+
+func _play_animation_containing(keyword: String) -> void:
+	if anim_player == null:
+		return
+	for anim_name in anim_player.get_animation_list():
+		if keyword.to_lower() in anim_name.to_lower():
+			anim_player.play(anim_name)
+			return
+
+func enable_movement() -> void:
+	if movement_enabled:
+		return
+	movement_enabled = true
+	_play_animation_containing("run")
+
+func _physics_process(delta: float) -> void:
+	if GameManager.is_game_over:
+		return
+
+	if not movement_enabled:
+		elapsed_since_ready += delta
+		if elapsed_since_ready >= start_delay:
+			enable_movement()
+		return
+
+	if global_position.y < fall_death_y:
+		GameManager.trigger_game_over()
+		freeze = true
+		if anim_player:
+			anim_player.stop()
+		return
+
+	var distance: float = max(-global_position.z, 0.0)
+	var current_max_speed: float = min(base_max_forward_speed + distance * difficulty_ramp, max_speed_cap)
+	linear_velocity.z = lerp(linear_velocity.z, -current_max_speed, speed_ramp_rate)
+
+	var center_x: float = 0.0
+	if track_manager != null:
+		center_x = track_manager.get_path_x(global_position.z)
+	var relative_x: float = global_position.x - center_x
+
+	if relative_x > lane_limit:
+		apply_central_force(Vector3(-steer_force * mass, 0, 0))
+	elif relative_x < -lane_limit:
+		apply_central_force(Vector3(steer_force * mass, 0, 0))
+
+	if fast_falling and not is_grounded:
+		apply_central_force(Vector3(0, -fast_fall_force * mass, 0))
+
+func _input(event: InputEvent) -> void:
+	if GameManager.is_game_over or not movement_enabled:
+		return
+
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			touch_start_x = event.position.x
+			touch_start_y = event.position.y
+			is_dragging = true
+			jump_consumed = false
+			if not is_grounded:
+				fast_falling = true
+				apply_central_impulse(Vector3(0, -slam_impulse * mass, 0))
+		else:
+			var total_delta_y: float = event.position.y - touch_start_y
+			if not jump_consumed and total_delta_y < -jump_threshold:
+				_jump()
+			is_dragging = false
+			fast_falling = false
+
+	elif event is InputEventScreenDrag and is_dragging:
+		var delta_x: float = event.position.x - touch_start_x
+		var delta_y: float = event.position.y - touch_start_y
+
+		if abs(delta_y) > abs(delta_x):
+			if delta_y < -jump_threshold and not jump_consumed:
+				_jump()
+			elif delta_y > fast_fall_threshold:
+				fast_falling = true
+		elif abs(delta_x) > 15.0:
+			var direction: float = sign(delta_x)
+			apply_central_force(Vector3(direction * steer_force * mass, 0, 0))
+			touch_start_x = event.position.x
+
+func _jump() -> void:
+	if is_grounded:
+		apply_central_impulse(Vector3(0, jump_impulse * mass, 0))
+		is_grounded = false
+		jump_consumed = true
+		SFX.play_jump()
+
+func _on_body_entered(body: Node) -> void:
+	if body.is_in_group("obstacles"):
+		GameManager.trigger_game_over()
+		freeze = true
+		if anim_player:
+			anim_player.stop()
+	else:
+		is_grounded = true
+
+
+/* ==================== ./scripts/camera_follow.gd ==================== */
+
+extends Camera3D
+
+@export var target_path: NodePath
+@export var offset: Vector3 = Vector3(0, 2.4, 4.2)
+@export var follow_speed: float = 8.0
+@export var vertical_follow_factor: float = 0.15
+@export var look_ahead_distance: float = 6.0
+
+var target: Node3D
+var smoothed_y: float = 0.0
+
+func _ready() -> void:
+	target = get_node(target_path)
+	smoothed_y = target.global_position.y
+
+func _process(delta: float) -> void:
+	if target == null:
+		return
+
+	smoothed_y = lerp(smoothed_y, target.global_position.y, vertical_follow_factor)
+
+	var desired_position: Vector3 = Vector3(
+		target.global_position.x + offset.x,
+		smoothed_y + offset.y,
+		target.global_position.z + offset.z
+	)
+	global_position = global_position.lerp(desired_position, follow_speed * delta)
+
+	var look_target: Vector3 = Vector3(
+		target.global_position.x,
+		smoothed_y,
+		target.global_position.z - look_ahead_distance
+	)
+	look_at(look_target, Vector3.UP)
+
+
+/* ==================== ./scripts/track_manager.gd ==================== */
+
+extends Node3D
+
+@export var track_piece_scene: PackedScene = preload("res://scenes/TrackPiece.tscn")
+@export var obstacle_scene: PackedScene = preload("res://scenes/Obstacle.tscn")
+@export var coin_scene: PackedScene = preload("res://scenes/Coin.tscn")
+@export var piece_length: float = 4.18
+@export var pieces_ahead: int = 35
+@export var min_pieces_between_obstacles: int = 5
+@export var lane_offset: float = 1.3
+@export var ball_path: NodePath
+
+var tree_scenes: Array[PackedScene] = [
+	preload("res://assets/trees/tree_pineTallA.glb"),
+	preload("res://assets/trees/tree_default.glb"),
+	preload("res://assets/trees/tree_oak.glb"),
+]
+var grass_scenes: Array[PackedScene] = [
+	preload("res://assets/grass/grass.glb"),
+	preload("res://assets/grass/grass_leafs.glb"),
+]
+
+var ball: Node3D
+var active_pieces: Array[Node3D] = []
+var active_trees: Array[Node3D] = []
+var active_grass: Array[Node3D] = []
+var next_z: float = 0.0
+var piece_count: int = 0
+var pieces_since_obstacle: int = 999
+var rng := RandomNumberGenerator.new()
+
+func _ready() -> void:
+	ball = get_node(ball_path)
+	rng.randomize()
+	for i in range(pieces_ahead):
+		_spawn_piece()
+
+func get_path_x(_z: float) -> float:
+	return 0.0
+
+func _process(_delta: float) -> void:
+	if ball == null:
+		return
+
+	if active_pieces.size() > 0:
+		var last_piece_z: float = active_pieces[active_pieces.size() - 1].global_position.z
+		if ball.global_position.z - last_piece_z < piece_length * 25.0:
+			_spawn_piece()
+
+	while active_pieces.size() > 0 and active_pieces[0].global_position.z - ball.global_position.z > piece_length * 25.0:
+		var old_piece: Node3D = active_pieces.pop_front()
+		old_piece.queue_free()
+
+	while active_trees.size() > 0 and active_trees[0].global_position.z - ball.global_position.z > piece_length * 25.0:
+		var old_tree: Node3D = active_trees.pop_front()
+		old_tree.queue_free()
+
+	while active_grass.size() > 0 and active_grass[0].global_position.z - ball.global_position.z > piece_length * 25.0:
+		var old_grass: Node3D = active_grass.pop_front()
+		old_grass.queue_free()
+
+func _spawn_piece() -> void:
+	var piece: Node3D = track_piece_scene.instantiate()
+	add_child(piece)
+	piece.global_position = Vector3(0, 0, next_z)
+	active_pieces.append(piece)
+
+	piece_count += 1
+	pieces_since_obstacle += 1
+
+	if piece_count > 6:
+		var roll: float = rng.randf()
+		if roll < 0.16 and pieces_since_obstacle >= min_pieces_between_obstacles:
+			var lane: float = float(rng.randi_range(-1, 1)) * lane_offset
+			var obstacle: Node3D = obstacle_scene.instantiate()
+			add_child(obstacle)
+			obstacle.global_position = Vector3(lane, 1.87, next_z)
+			pieces_since_obstacle = 0
+		elif roll < 0.38:
+			var coin_lane: float = float(rng.randi_range(-1, 1)) * lane_offset
+			var coin: Node3D = coin_scene.instantiate()
+			add_child(coin)
+			coin.global_position = Vector3(coin_lane, 2.6, next_z)
+
+	if piece_count % 2 == 0:
+		var side: float = -1.0 if rng.randf() < 0.5 else 1.0
+		var chosen_tree: PackedScene = tree_scenes[rng.randi_range(0, tree_scenes.size() - 1)]
+		var tree: Node3D = chosen_tree.instantiate()
+		add_child(tree)
+		var x_offset: float = side * rng.randf_range(5.0, 18.0)
+		var scale_factor: float = rng.randf_range(2.5, 5.0)
+		tree.global_position = Vector3(x_offset, -1.2, next_z)
+		tree.scale = Vector3(scale_factor, scale_factor, scale_factor)
+		tree.rotate_y(rng.randf_range(0.0, TAU))
+		active_trees.append(tree)
+
+	for k in range(2):
+		var g_side: float = -1.0 if rng.randf() < 0.5 else 1.0
+		var chosen_grass: PackedScene = grass_scenes[rng.randi_range(0, grass_scenes.size() - 1)]
+		var grass: Node3D = chosen_grass.instantiate()
+		add_child(grass)
+		var g_offset: float = g_side * rng.randf_range(2.8, 6.0)
+		var g_scale: float = rng.randf_range(3.0, 6.0)
+		grass.global_position = Vector3(g_offset, -1.2, next_z + rng.randf_range(-1.0, 1.0))
+		grass.scale = Vector3(g_scale, g_scale, g_scale)
+		grass.rotate_y(rng.randf_range(0.0, TAU))
+		active_grass.append(grass)
+
+	next_z -= piece_length
+
+
+/* ==================== ./scripts/track_piece.gd ==================== */
+
+extends StaticBody3D
+
+static var cached_material: StandardMaterial3D = null
+
+func _ready() -> void:
+	if cached_material == null:
+		cached_material = StandardMaterial3D.new()
+		cached_material.albedo_color = Color(0.36, 0.24, 0.14)
+		cached_material.metallic = 0.0
+		cached_material.roughness = 0.95
+	_apply_material_recursive($Model, cached_material)
+
+func _apply_material_recursive(node: Node, mat: Material) -> void:
+	if node is MeshInstance3D:
+		var mesh_instance: MeshInstance3D = node
+		if mesh_instance.mesh:
+			for i in range(mesh_instance.mesh.get_surface_count()):
+				mesh_instance.set_surface_override_material(i, mat)
+	for child in node.get_children():
+		_apply_material_recursive(child, mat)
+
+
+/* ==================== ./scripts/theme_manager.gd ==================== */
+
+extends Node
+
+var themes: Dictionary = {
+	"royal_gold": {
+		"ball_color": Color(0.83, 0.68, 0.21),
+		"ball_emission": Color(0.6, 0.45, 0.05),
+		"track_color": Color(0.16, 0.08, 0.27),
+		"sky_top": Color(0.15, 0.45, 0.85),
+		"sky_horizon": Color(0.75, 0.85, 0.95),
+	}
+}
+
+var current_theme: String = "royal_gold"
+
+func get_current_theme() -> Dictionary:
+	return themes[current_theme]
+
+func set_theme(theme_name: String) -> void:
+	if themes.has(theme_name):
+		current_theme = theme_name
+
+
+/* ==================== ./scripts/environment_theme.gd ==================== */
+
+extends WorldEnvironment
+
+func _ready() -> void:
+	var theme_data: Dictionary = ThemeManager.get_current_theme()
+	var sky_shader: Shader = load("res://shaders/sky.gdshader")
+	var sky_material := ShaderMaterial.new()
+	sky_material.shader = sky_shader
+	sky_material.set_shader_parameter("sky_top_color", theme_data.sky_top)
+	sky_material.set_shader_parameter("sky_horizon_color", theme_data.sky_horizon)
+	sky_material.set_shader_parameter("sun_direction", Vector3(0.3, 0.35, 0.85))
+
+	var sky := Sky.new()
+	sky.sky_material = sky_material
+
+	var new_environment := Environment.new()
+	new_environment.background_mode = Environment.BG_SKY
+	new_environment.sky = sky
+	new_environment.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	new_environment.ambient_light_energy = 0.65
+	new_environment.fog_sky_affect = 0.0
+
+	new_environment.fog_enabled = true
+	new_environment.fog_light_color = theme_data.sky_horizon
+	new_environment.fog_light_energy = 0.55
+	new_environment.fog_depth_begin = 45.0
+	new_environment.fog_depth_end = 150.0
+
+	environment = new_environment
+
+
+/* ==================== ./scripts/game_manager.gd ==================== */
+
+extends Node
+
+signal game_over
+
+var is_game_over: bool = false
+var coin_score: int = 0
+var best_score: int = 0
+var last_score: int = 0
+
+const SAVE_PATH := "user://highscore.save"
+
+func _ready() -> void:
+	_load_best_score()
+
+func reset() -> void:
+	is_game_over = false
+	coin_score = 0
+
+func trigger_game_over() -> void:
+	if is_game_over:
+		return
+	is_game_over = true
+	SFX.play_gameover()
+	emit_signal("game_over")
+
+func add_coin_score(amount: int) -> void:
+	if not is_game_over:
+		coin_score += amount
+		SFX.play_coin()
+
+func report_final_score(total: int) -> void:
+	last_score = total
+	if total > best_score:
+		best_score = total
+		_save_best_score()
+
+func _load_best_score() -> void:
+	if FileAccess.file_exists(SAVE_PATH):
+		var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+		best_score = file.get_32()
+		file.close()
+
+func _save_best_score() -> void:
+	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	file.store_32(best_score)
+	file.close()
+
+
+/* ==================== ./scripts/hud.gd ==================== */
+
+extends CanvasLayer
+
+@export var ball_path: NodePath
+var ball: Node3D
+var current_total: int = 0
+
+func _ready() -> void:
+	ball = get_node(ball_path)
+	GameManager.game_over.connect(_on_game_over)
+	$GameOverPanel.visible = false
+	$PausePanel.visible = false
+	$PausePanel.process_mode = Node.PROCESS_MODE_ALWAYS
+	$PauseButton.process_mode = Node.PROCESS_MODE_ALWAYS
+
+func _process(_delta: float) -> void:
+	if ball and not GameManager.is_game_over:
+		var distance: int = int(-ball.global_position.z)
+		current_total = max(distance, 0) + GameManager.coin_score
+		$ScoreLabel.text = "Score: %d" % current_total
+
+func _on_game_over() -> void:
+	GameManager.report_final_score(current_total)
+	$GameOverPanel/FinalScoreLabel.text = "Score: %d\nBest: %d" % [current_total, GameManager.best_score]
+	$GameOverPanel.visible = true
+
+func _on_restart_pressed() -> void:
+	GameManager.reset()
+	get_tree().reload_current_scene()
+
+func _on_pause_pressed() -> void:
+	if GameManager.is_game_over:
+		return
+	get_tree().paused = true
+	$PausePanel.visible = true
+
+func _on_resume_pressed() -> void:
+	get_tree().paused = false
+	$PausePanel.visible = false
+
+func _on_menu_pressed() -> void:
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+
+
+/* ==================== ./scripts/obstacle.gd ==================== */
+
+extends StaticBody3D
+
+func _ready() -> void:
+	add_to_group("obstacles")
+
+
+/* ==================== ./scripts/coin.gd ==================== */
+
+extends Area3D
+
+func _ready() -> void:
+	body_entered.connect(_on_body_entered)
+
+func _on_body_entered(body: Node) -> void:
+	if body.is_in_group("player"):
+		GameManager.add_coin_score(10)
+		queue_free()
+
+
+/* ==================== ./scripts/sky_decor.gd ==================== */
+
+extends Node3D
+
+@export var rotation_speed: float = 0.05
+
+func _process(delta: float) -> void:
+	rotate_y(rotation_speed * delta)
+
+
+/* ==================== ./scripts/main_menu.gd ==================== */
+
+extends Control
+
+var loading: bool = false
+var loading_start_time: int = 0
+const MIN_LOADING_MS := 600
+
+func _ready() -> void:
+	$BestLabel.text = "Best: %d" % GameManager.best_score
+	$LoadingPanel.visible = false
+
+func _on_horses_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/HorseShop.tscn")
+
+func _on_play_pressed() -> void:
+	GameManager.reset()
+	$PlayButton.disabled = true
+	$LoadingPanel.visible = true
+	$LoadingPanel/LoadingBar.value = 0.0
+	loading_start_time = Time.get_ticks_msec()
+	ResourceLoader.load_threaded_request("res://scenes/Main.tscn")
+	loading = true
+
+func _process(_delta: float) -> void:
+	if not loading:
+		return
+	var progress: Array = []
+	var status: int = ResourceLoader.load_threaded_get_status("res://scenes/Main.tscn", progress)
+	if status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+		if progress.size() > 0:
+			$LoadingPanel/LoadingBar.value = progress[0] * 100.0
+	elif status == ResourceLoader.THREAD_LOAD_LOADED:
+		var elapsed: int = Time.get_ticks_msec() - loading_start_time
+		if elapsed < MIN_LOADING_MS:
+			$LoadingPanel/LoadingBar.value = 100.0
+			await get_tree().create_timer(float(MIN_LOADING_MS - elapsed) / 1000.0).timeout
+		loading = false
+		var packed_scene: PackedScene = ResourceLoader.load_threaded_get("res://scenes/Main.tscn")
+		get_tree().change_scene_to_packed(packed_scene)
+	elif status == ResourceLoader.THREAD_LOAD_FAILED:
+		loading = false
+		$LoadingPanel.visible = false
+		$PlayButton.disabled = false
+
+
+/* ==================== ./scripts/sfx_manager.gd ==================== */
+
+extends Node
+
+var jump_sound: AudioStream = preload("res://assets/sounds/jump.ogg")
+var coin_sound: AudioStream = preload("res://assets/sounds/coin.ogg")
+var gameover_sound: AudioStream = preload("res://assets/sounds/gameover.ogg")
+
+func play_jump() -> void:
+	_play(jump_sound)
+
+func play_coin() -> void:
+	_play(coin_sound)
+
+func play_gameover() -> void:
+	_play(gameover_sound)
+
+func _play(stream: AudioStream) -> void:
+	var player := AudioStreamPlayer.new()
+	add_child(player)
+	player.stream = stream
+	player.play()
+	player.finished.connect(player.queue_free)
+
+
+/* ==================== ./scripts/launcher.gd ==================== */
+
+extends Node3D
+
+@export var ball_path: NodePath
+@export var launch_force: Vector3 = Vector3(0, 2.0, -11.0)
+@export var recoil_amount: float = 0.25
+@export var recoil_time: float = 0.12
+
+var ball: RigidBody3D
+var has_launched: bool = false
+
+func _ready() -> void:
+	ball = get_node(ball_path)
+	var barrel: Node3D = $Barrel
+	var original_z: float = barrel.position.z
+	var tween := create_tween()
+	tween.tween_interval(0.6)
+	tween.tween_property(barrel, "position:z", original_z + recoil_amount, recoil_time)
+	tween.tween_callback(_fire)
+	tween.tween_property(barrel, "position:z", original_z, 0.2)
+
+func _fire() -> void:
+	if has_launched or ball == null:
+		return
+	has_launched = true
+	ball.enable_movement()
+	ball.apply_central_impulse(launch_force * ball.mass)
+	$Barrel/Flash.visible = true
+	var flash_tween := create_tween()
+	flash_tween.tween_interval(0.08)
+	flash_tween.tween_callback(func(): $Barrel/Flash.visible = false)
+
+
+/* ==================== ./scripts/menu_ball_spin.gd ==================== */
+
+extends Node3D
+
+@export var spin_speed: Vector2 = Vector2(0.6, 0.9)
+
+func _process(delta: float) -> void:
+	rotate_x(spin_speed.x * delta)
+	rotate_y(spin_speed.y * delta)
+
+
+/* ==================== ./scripts/horse_manager.gd ==================== */
+
+extends Node
+
+const SAVE_PATH := "user://horse_select.save"
+var selected_horse: int = 0
+var horse_paths: Array[String] = [
+	"res://assets/horses/horse-01.glb",
+	"res://assets/horses/horse-02.glb",
+	"res://assets/horses/horse-03.glb",
+	"res://assets/horses/horse-04.glb",
+]
+var horse_names: Array[String] = ["Thunder", "Blaze", "Storm", "Shadow"]
+
+func _ready() -> void:
+	_load()
+
+func get_selected_path() -> String:
+	return horse_paths[selected_horse]
+
+func select_horse(index: int) -> void:
+	selected_horse = clamp(index, 0, horse_paths.size() - 1)
+	_save()
+
+func _load() -> void:
+	if FileAccess.file_exists(SAVE_PATH):
+		var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+		selected_horse = file.get_32()
+		file.close()
+
+func _save() -> void:
+	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	file.store_32(selected_horse)
+	file.close()
+
+
+/* ==================== ./scripts/horse_shop.gd ==================== */
+
+extends Control
+
+var preview_model: Node3D = null
+
+func _ready() -> void:
+	_update_buttons()
+	_load_preview(HorseManager.selected_horse)
+
+func _process(delta: float) -> void:
+	if preview_model:
+		preview_model.rotate_y(0.7 * delta)
+
+func _update_buttons() -> void:
+	for i in range(4):
+		var btn: Button = get_node("Horse%d" % (i + 1))
+		var label: String = HorseManager.horse_names[i]
+		if i == HorseManager.selected_horse:
+			label += "  ★"
+		btn.text = label
+
+func _load_preview(index: int) -> void:
+	if preview_model:
+		preview_model.queue_free()
+		preview_model = null
+	var horse_scene: PackedScene = load(HorseManager.horse_paths[index])
+	preview_model = horse_scene.instantiate()
+	preview_model.scale = Vector3(1.1, 1.1, 1.1)
+	preview_model.position = Vector3(0, -1.3, 0)
+	$StableViewportContainer/StableViewport/PreviewAnchor.add_child(preview_model)
+	var anim_player: AnimationPlayer = _find_animation_player(preview_model)
+	if anim_player:
+		for anim_name in anim_player.get_animation_list():
+			if "idle" in anim_name.to_lower():
+				anim_player.play(anim_name)
+				break
+
+func _find_animation_player(node: Node) -> AnimationPlayer:
+	if node is AnimationPlayer:
+		return node
+	for child in node.get_children():
+		var result: AnimationPlayer = _find_animation_player(child)
+		if result:
+			return result
+	return null
+
+func _select(index: int) -> void:
+	HorseManager.select_horse(index)
+	_update_buttons()
+	_load_preview(index)
+
+func _on_horse1_pressed() -> void:
+	_select(0)
+
+func _on_horse2_pressed() -> void:
+	_select(1)
+
+func _on_horse3_pressed() -> void:
+	_select(2)
+
+func _on_horse4_pressed() -> void:
+	_select(3)
+
+func _on_back_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")

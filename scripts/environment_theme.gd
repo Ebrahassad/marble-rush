@@ -1,5 +1,6 @@
 extends WorldEnvironment
 
+
 func _ready() -> void:
 	var theme_data: Dictionary = ThemeManager.get_current_theme()
 	var sky_shader: Shader = load("res://shaders/sky.gdshader")
