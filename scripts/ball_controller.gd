@@ -23,6 +23,7 @@ var is_grounded: bool = false
 var fast_falling: bool = false
 var jump_consumed: bool = false
 var movement_enabled: bool = false
+var elapsed_since_ready: float = 0.0
 var track_manager: Node = null
 var anim_player: AnimationPlayer = null
 
@@ -43,8 +44,6 @@ func _ready() -> void:
 	anim_player = _find_animation_player(model)
 	_play_animation_containing("idle")
 
-	get_tree().create_timer(start_delay).timeout.connect(enable_movement)
-
 func _find_animation_player(node: Node) -> AnimationPlayer:
 	if node is AnimationPlayer:
 		return node
@@ -63,6 +62,8 @@ func _play_animation_containing(keyword: String) -> void:
 			return
 
 func enable_movement() -> void:
+	if movement_enabled:
+		return
 	movement_enabled = true
 	_play_animation_containing("run")
 
@@ -71,6 +72,9 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if not movement_enabled:
+		elapsed_since_ready += delta
+		if elapsed_since_ready >= start_delay:
+			enable_movement()
 		return
 
 	if global_position.y < fall_death_y:
@@ -82,9 +86,7 @@ func _physics_process(delta: float) -> void:
 
 	var distance: float = max(-global_position.z, 0.0)
 	var current_max_speed: float = min(base_max_forward_speed + distance * difficulty_ramp, max_speed_cap)
-
-	var new_z_velocity: float = lerp(linear_velocity.z, -current_max_speed, speed_ramp_rate)
-	linear_velocity.z = new_z_velocity
+	linear_velocity.z = lerp(linear_velocity.z, -current_max_speed, speed_ramp_rate)
 
 	var center_x: float = 0.0
 	if track_manager != null:
