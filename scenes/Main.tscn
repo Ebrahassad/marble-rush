@@ -50,6 +50,15 @@ ball_path = NodePath("../Ball")
 script = ExtResource("6")
 ball_path = NodePath("../Ball")
 
+[node name="HitsLabel" type="Label" parent="HUD"]
+offset_left = 30.0
+offset_top = 200.0
+offset_right = 300.0
+offset_bottom = 250.0
+theme_override_font_sizes/font_size = 32
+theme_override_colors/font_color = Color(1, 0.4, 0.3, 1)
+text = "Hits: 3"
+
 [node name="ScoreLabel" type="Label" parent="HUD"]
 offset_left = 30.0
 offset_top = 110.0

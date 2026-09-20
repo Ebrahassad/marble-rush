@@ -147,9 +147,10 @@ func _jump() -> void:
 
 func _on_body_entered(body: Node) -> void:
 	if body.is_in_group("obstacles"):
-		GameManager.trigger_game_over()
-		freeze = true
-		if anim_player:
-			anim_player.stop()
+		var died: bool = GameManager.register_hit()
+		if died:
+			freeze = true
+			if anim_player:
+				anim_player.stop()
 	else:
 		is_grounded = true
