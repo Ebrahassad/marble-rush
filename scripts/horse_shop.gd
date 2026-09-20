@@ -40,8 +40,8 @@ func _load_preview(index: int) -> void:
 		preview_model = null
 	var horse_scene: PackedScene = load(HorseManager.horse_paths[index])
 	preview_model = horse_scene.instantiate()
-	preview_model.scale = Vector3(1.1, 1.1, 1.1)
-	preview_model.position = Vector3(0, -1.3, 0)
+	preview_model.scale = Vector3(2.6, 2.6, 2.6)
+	preview_model.position = Vector3(0, -1.6, 2.5)
 	$StableViewportContainer/StableViewport/PreviewAnchor.add_child(preview_model)
 	var anim_player: AnimationPlayer = _find_animation_player(preview_model)
 	if anim_player:

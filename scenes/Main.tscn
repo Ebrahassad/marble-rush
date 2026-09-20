@@ -6,15 +6,16 @@
 [ext_resource type="Script" path="res://scripts/track_manager.gd" id="4"]
 [ext_resource type="Script" path="res://scripts/environment_theme.gd" id="5"]
 [ext_resource type="Script" path="res://scripts/hud.gd" id="6"]
-[ext_resource type="Texture2D" path="res://assets/ground/road_color.jpg" id="7"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_1"]
 size = Vector2(600, 3000)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
-albedo_texture = ExtResource("7")
-roughness = 1.0
-uv1_scale = Vector3(60, 300, 1)
+albedo_color = Color(0.15, 0.78, 0.2, 1)
+roughness = 0.85
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(600, 0.4, 3000)
 
 [node name="Main" type="Node3D"]
 
@@ -26,10 +27,16 @@ transform = Transform3D(0.8, -0.4, 0.4, 0, 0.9, 0.4, -0.5, -0.3, 0.8, 0, 5, 0)
 light_color = Color(1, 0.92, 0.75, 1)
 shadow_enabled = true
 
-[node name="Ground" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.2, -1400)
+[node name="Ground" type="StaticBody3D" parent="."]
+
+[node name="GroundMesh" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.87, -1400)
 mesh = SubResource("PlaneMesh_1")
 surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+
+[node name="GroundCollision" type="CollisionShape3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.67, -1400)
+shape = SubResource("BoxShape3D_ground")
 
 [node name="Ball" parent="." instance=ExtResource("1")]
 track_manager_path = NodePath("../TrackManager")

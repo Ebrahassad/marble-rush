@@ -1,11 +1,10 @@
 extends Node3D
 
-@export var track_piece_scene: PackedScene = preload("res://scenes/TrackPiece.tscn")
 @export var obstacle_scene: PackedScene = preload("res://scenes/Obstacle.tscn")
-@export var apple_scene: PackedScene = preload("res://scenes/Apple.tscn")
-@export var piece_length: float = 4.18
-@export var pieces_ahead: int = 35
-@export var min_pieces_between_obstacles: int = 5
+@export var coin_scene: PackedScene = preload("res://scenes/Apple.tscn")
+@export var spawn_step: float = 4.18
+@export var spawn_ahead: int = 35
+@export var min_steps_between_obstacles: int = 5
 @export var lane_offset: float = 1.3
 @export var ball_path: NodePath
 
@@ -20,89 +19,74 @@ var grass_scenes: Array[PackedScene] = [
 ]
 
 var ball: Node3D
-var active_pieces: Array[Node3D] = []
 var active_trees: Array[Node3D] = []
 var active_grass: Array[Node3D] = []
+var active_obstacles: Array[Node3D] = []
+var active_coins: Array[Node3D] = []
 var next_z: float = 0.0
-var piece_count: int = 0
-var pieces_since_obstacle: int = 999
+var step_count: int = 0
+var steps_since_obstacle: int = 999
 var rng := RandomNumberGenerator.new()
 
-
 func _ready() -> void:
-
-	ball = get_node_or_null(ball_path)
+	ball = get_node(ball_path)
 	rng.randomize()
-	for i in range(pieces_ahead):
-		_spawn_piece()
-
+	for i in range(spawn_ahead):
+		_spawn_step()
 
 func get_path_x(_z: float) -> float:
 	return 0.0
-
 
 func _process(_delta: float) -> void:
 	if ball == null:
 		return
 
-	if active_pieces.size() > 0:
-		var last_piece_z: float = active_pieces[active_pieces.size() - 1].global_position.z
-		if ball.global_position.z - last_piece_z < piece_length * 25.0:
-			_spawn_piece()
+	var despawn_distance: float = spawn_step * spawn_ahead
 
-	while (
-		active_pieces.size() > 0
-		and active_pieces[0].global_position.z - ball.global_position.z > piece_length * 25.0
-	):
-		var old_piece: Node3D = active_pieces.pop_front()
-		old_piece.queue_free()
+	if ball.global_position.z - next_z < despawn_distance:
+		_spawn_step()
 
-	while (
-		active_trees.size() > 0
-		and active_trees[0].global_position.z - ball.global_position.z > piece_length * 25.0
-	):
-		var old_tree: Node3D = active_trees.pop_front()
-		old_tree.queue_free()
+	_despawn_far(active_trees, despawn_distance)
+	_despawn_far(active_grass, despawn_distance)
+	_despawn_far(active_obstacles, despawn_distance)
+	_despawn_far(active_coins, despawn_distance)
 
-	while (
-		active_grass.size() > 0
-		and active_grass[0].global_position.z - ball.global_position.z > piece_length * 25.0
-	):
-		var old_grass: Node3D = active_grass.pop_front()
-		old_grass.queue_free()
+func _despawn_far(list: Array[Node3D], despawn_distance: float) -> void:
+	while list.size() > 0 and is_instance_valid(list[0]) == false:
+		list.pop_front()
+	while list.size() > 0 and list[0].global_position.z - ball.global_position.z > despawn_distance:
+		var old: Node3D = list.pop_front()
+		if is_instance_valid(old):
+			old.queue_free()
 
+func _spawn_step() -> void:
+	step_count += 1
+	steps_since_obstacle += 1
 
-func _spawn_piece() -> void:
-	var piece: Node3D = track_piece_scene.instantiate()
-	add_child(piece)
-	piece.global_position = Vector3(0, 0, next_z)
-	active_pieces.append(piece)
-
-	piece_count += 1
-	pieces_since_obstacle += 1
-
-	if piece_count > 6:
+	if step_count > 6:
 		var roll: float = rng.randf()
-		if roll < 0.16 and pieces_since_obstacle >= min_pieces_between_obstacles:
+		if roll < 0.16 and steps_since_obstacle >= min_steps_between_obstacles:
 			var lane: float = float(rng.randi_range(-1, 1)) * lane_offset
 			var obstacle: Node3D = obstacle_scene.instantiate()
 			add_child(obstacle)
 			obstacle.global_position = Vector3(lane, 1.87, next_z)
-			pieces_since_obstacle = 0
+			active_obstacles.append(obstacle)
+			steps_since_obstacle = 0
 		elif roll < 0.38:
-			var apple_lane: float = float(rng.randi_range(-1, 1)) * lane_offset
-			var apple: Node3D = apple_scene.instantiate()
-			add_child(apple)
-			apple.global_position = Vector3(apple_lane, 2.6, next_z)
+			var coin_lane: float = float(rng.randi_range(-1, 1)) * lane_offset
+			var coin: Node3D = coin_scene.instantiate()
+			add_child(coin)
+			coin.global_position = Vector3(coin_lane, 2.6, next_z)
+			active_coins.append(coin)
 
-	if piece_count % 2 == 0:
+	if step_count % 2 == 0:
 		var side: float = -1.0 if rng.randf() < 0.5 else 1.0
 		var chosen_tree: PackedScene = tree_scenes[rng.randi_range(0, tree_scenes.size() - 1)]
 		var tree: Node3D = chosen_tree.instantiate()
 		add_child(tree)
 		var x_offset: float = side * rng.randf_range(5.0, 18.0)
 		var scale_factor: float = rng.randf_range(2.5, 5.0)
-		tree.global_position = Vector3(x_offset, -1.2, next_z)
+		tree.global_position = Vector3(x_offset, 1.87, next_z)
 		tree.scale = Vector3(scale_factor, scale_factor, scale_factor)
 		tree.rotate_y(rng.randf_range(0.0, TAU))
 		active_trees.append(tree)
@@ -114,9 +98,9 @@ func _spawn_piece() -> void:
 		add_child(grass)
 		var g_offset: float = g_side * rng.randf_range(2.8, 6.0)
 		var g_scale: float = rng.randf_range(3.0, 6.0)
-		grass.global_position = Vector3(g_offset, -1.2, next_z + rng.randf_range(-1.0, 1.0))
+		grass.global_position = Vector3(g_offset, 1.87, next_z + rng.randf_range(-1.0, 1.0))
 		grass.scale = Vector3(g_scale, g_scale, g_scale)
 		grass.rotate_y(rng.randf_range(0.0, TAU))
 		active_grass.append(grass)
 
-	next_z -= piece_length
+	next_z -= spawn_step
