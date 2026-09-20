@@ -50,7 +50,7 @@ theme_override_font_sizes/font_size = 76
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.02, 1)
 theme_override_constants/outline_size = 10
-text = "Marble Rush"
+text = "Gallop"
 
 [node name="BestLabel" type="Label" parent="."]
 anchor_left = 0.5

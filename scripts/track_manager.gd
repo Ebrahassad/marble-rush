@@ -2,7 +2,7 @@ extends Node3D
 
 @export var track_piece_scene: PackedScene = preload("res://scenes/TrackPiece.tscn")
 @export var obstacle_scene: PackedScene = preload("res://scenes/Obstacle.tscn")
-@export var apple_scene: PackedScene = preload("res://scenes/Coin.tscn")
+@export var apple_scene: PackedScene = preload("res://scenes/Apple.tscn")
 @export var piece_length: float = 4.18
 @export var pieces_ahead: int = 35
 @export var min_pieces_between_obstacles: int = 5
@@ -30,8 +30,6 @@ var rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
-	if ResourceLoader.exists("res://scenes/Apple.tscn"):
-		apple_scene = load("res://scenes/Apple.tscn")
 
 	ball = get_node_or_null(ball_path)
 	rng.randomize()
