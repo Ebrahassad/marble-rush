@@ -28,6 +28,7 @@ func _load_preview(index: int) -> void:
 	model.position = Vector3(0, -1.0, 0)
 	viewport.add_child(model)
 	preview_models[index] = model
+	HorseManager.apply_horse_color(model, index)
 	var anim_player: AnimationPlayer = _find_animation_player(model)
 	if anim_player:
 		for anim_name in anim_player.get_animation_list():
