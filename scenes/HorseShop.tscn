@@ -1,104 +1,171 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://scripts/horse_shop.gd" id="1"]
-[ext_resource type="PackedScene" path="res://assets/stable/scene.gltf" id="2"]
-
-[sub_resource type="Gradient" id="Gradient_bg"]
-colors = PackedColorArray(0.18, 0.09, 0.32, 1, 0.05, 0.02, 0.1, 1)
 
 [node name="HorseShop" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1")
 
+[node name="Background" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.101961, 0.043137, 0.180392, 1)
+
 [node name="TitleLabel" type="Label" parent="."]
 anchor_left = 0.5
-anchor_top = 0.03
+anchor_top = 0.05
 anchor_right = 0.5
-anchor_bottom = 0.03
+anchor_bottom = 0.05
 offset_left = -220.0
 offset_right = 220.0
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 42
+theme_override_font_sizes/font_size = 44
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
-theme_override_colors/font_outline_color = Color(0.1, 0.05, 0.02, 1)
-theme_override_constants/outline_size = 6
-text = "The Stable"
+text = "Choose Your Horse"
 
-[node name="StableViewportContainer" type="SubViewportContainer" parent="."]
+[node name="Previews" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Slot1" type="SubViewportContainer" parent="Previews"]
 anchor_left = 0.5
-anchor_top = 0.1
+anchor_top = 0.14
 anchor_right = 0.5
-anchor_bottom = 0.1
-offset_left = -340.0
-offset_right = 340.0
+anchor_bottom = 0.14
+offset_left = -330.0
+offset_right = -20.0
 offset_top = 0.0
-offset_bottom = 460.0
+offset_bottom = 260.0
 stretch = true
 
-[node name="StableViewport" type="SubViewport" parent="StableViewportContainer"]
-size = Vector2i(680, 460)
+[node name="Viewport" type="SubViewport" parent="Previews/Slot1"]
+transparent_bg = true
+size = Vector2i(310, 260)
 
-[node name="StableModel" parent="StableViewportContainer/StableViewport" instance=ExtResource("2")]
-transform = Transform3D(0.006, 0, 0, 0, 0.006, 0, 0, 0, 0.006, 0, -0.6, -1.5)
+[node name="Camera3D" type="Camera3D" parent="Previews/Slot1/Viewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 3.0)
 
-[node name="PreviewAnchor" type="Node3D" parent="StableViewportContainer/StableViewport"]
-
-[node name="Camera3D" type="Camera3D" parent="StableViewportContainer/StableViewport"]
-transform = Transform3D(1, 0, 0, 0, 0.97, 0.26, 0, -0.26, 0.97, 0, 1.2, 4.0)
-fov = 60.0
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="StableViewportContainer/StableViewport"]
-transform = Transform3D(0.8, -0.4, 0.4, 0, 0.9, 0.4, -0.5, -0.3, 0.8, 3, 4, 3)
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Previews/Slot1/Viewport"]
+transform = Transform3D(0.8, -0.4, 0.4, 0, 0.9, 0.4, -0.5, -0.3, 0.8, 2, 2, 2)
 light_color = Color(1, 0.92, 0.75, 1)
-light_energy = 1.3
 
-[node name="Horse1" type="Button" parent="."]
+[node name="Slot2" type="SubViewportContainer" parent="Previews"]
 anchor_left = 0.5
-anchor_top = 0.55
+anchor_top = 0.14
 anchor_right = 0.5
-anchor_bottom = 0.55
-offset_left = -320.0
-offset_right = -10.0
+anchor_bottom = 0.14
+offset_left = 20.0
+offset_right = 330.0
+offset_top = 0.0
+offset_bottom = 260.0
+stretch = true
+
+[node name="Viewport" type="SubViewport" parent="Previews/Slot2"]
+transparent_bg = true
+size = Vector2i(310, 260)
+
+[node name="Camera3D" type="Camera3D" parent="Previews/Slot2/Viewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 3.0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Previews/Slot2/Viewport"]
+transform = Transform3D(0.8, -0.4, 0.4, 0, 0.9, 0.4, -0.5, -0.3, 0.8, 2, 2, 2)
+light_color = Color(1, 0.92, 0.75, 1)
+
+[node name="Slot3" type="SubViewportContainer" parent="Previews"]
+anchor_left = 0.5
+anchor_top = 0.38
+anchor_right = 0.5
+anchor_bottom = 0.38
+offset_left = -330.0
+offset_right = -20.0
+offset_top = 0.0
+offset_bottom = 260.0
+stretch = true
+
+[node name="Viewport" type="SubViewport" parent="Previews/Slot3"]
+transparent_bg = true
+size = Vector2i(310, 260)
+
+[node name="Camera3D" type="Camera3D" parent="Previews/Slot3/Viewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 3.0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Previews/Slot3/Viewport"]
+transform = Transform3D(0.8, -0.4, 0.4, 0, 0.9, 0.4, -0.5, -0.3, 0.8, 2, 2, 2)
+light_color = Color(1, 0.92, 0.75, 1)
+
+[node name="Slot4" type="SubViewportContainer" parent="Previews"]
+anchor_left = 0.5
+anchor_top = 0.38
+anchor_right = 0.5
+anchor_bottom = 0.38
+offset_left = 20.0
+offset_right = 330.0
+offset_top = 0.0
+offset_bottom = 260.0
+stretch = true
+
+[node name="Viewport" type="SubViewport" parent="Previews/Slot4"]
+transparent_bg = true
+size = Vector2i(310, 260)
+
+[node name="Camera3D" type="Camera3D" parent="Previews/Slot4/Viewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 3.0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Previews/Slot4/Viewport"]
+transform = Transform3D(0.8, -0.4, 0.4, 0, 0.9, 0.4, -0.5, -0.3, 0.8, 2, 2, 2)
+light_color = Color(1, 0.92, 0.75, 1)
+
+[node name="Names" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Horse1" type="Button" parent="Names"]
+anchor_left = 0.5
+anchor_top = 0.62
+anchor_right = 0.5
+anchor_bottom = 0.62
+offset_left = -330.0
+offset_right = -20.0
 offset_top = 0.0
 offset_bottom = 80.0
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 26
 text = "Thunder"
 
-[node name="Horse2" type="Button" parent="."]
+[node name="Horse2" type="Button" parent="Names"]
 anchor_left = 0.5
-anchor_top = 0.55
+anchor_top = 0.62
 anchor_right = 0.5
-anchor_bottom = 0.55
-offset_left = 10.0
-offset_right = 320.0
+anchor_bottom = 0.62
+offset_left = 20.0
+offset_right = 330.0
 offset_top = 0.0
 offset_bottom = 80.0
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 26
 text = "Blaze"
 
-[node name="Horse3" type="Button" parent="."]
+[node name="Horse3" type="Button" parent="Names"]
 anchor_left = 0.5
-anchor_top = 0.66
+anchor_top = 0.7
 anchor_right = 0.5
-anchor_bottom = 0.66
-offset_left = -320.0
-offset_right = -10.0
+anchor_bottom = 0.7
+offset_left = -330.0
+offset_right = -20.0
 offset_top = 0.0
 offset_bottom = 80.0
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 26
 text = "Storm"
 
-[node name="Horse4" type="Button" parent="."]
+[node name="Horse4" type="Button" parent="Names"]
 anchor_left = 0.5
-anchor_top = 0.66
+anchor_top = 0.7
 anchor_right = 0.5
-anchor_bottom = 0.66
-offset_left = 10.0
-offset_right = 320.0
+anchor_bottom = 0.7
+offset_left = 20.0
+offset_right = 330.0
 offset_top = 0.0
 offset_bottom = 80.0
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 26
 text = "Shadow"
 
 [node name="BackButton" type="Button" parent="."]
@@ -113,8 +180,8 @@ offset_bottom = 80.0
 theme_override_font_sizes/font_size = 30
 text = "Back"
 
-[connection signal="pressed" from="Horse1" to="." method="_on_horse1_pressed"]
-[connection signal="pressed" from="Horse2" to="." method="_on_horse2_pressed"]
-[connection signal="pressed" from="Horse3" to="." method="_on_horse3_pressed"]
-[connection signal="pressed" from="Horse4" to="." method="_on_horse4_pressed"]
+[connection signal="pressed" from="Names/Horse1" to="." method="_on_horse1_pressed"]
+[connection signal="pressed" from="Names/Horse2" to="." method="_on_horse2_pressed"]
+[connection signal="pressed" from="Names/Horse3" to="." method="_on_horse3_pressed"]
+[connection signal="pressed" from="Names/Horse4" to="." method="_on_horse4_pressed"]
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]

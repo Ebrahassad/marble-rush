@@ -1,7 +1,6 @@
 [gd_scene load_steps=10 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/Ball.tscn" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/TrackPiece.tscn" id="2"]
 [ext_resource type="Script" path="res://scripts/camera_follow.gd" id="3"]
 [ext_resource type="Script" path="res://scripts/track_manager.gd" id="4"]
 [ext_resource type="Script" path="res://scripts/environment_theme.gd" id="5"]
@@ -42,15 +41,14 @@ shape = SubResource("BoxShape3D_ground")
 track_manager_path = NodePath("../TrackManager")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.5, 15.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.0, 17.5)
 fov = 90.0
 script = ExtResource("3")
 target_path = NodePath("../Ball")
-offset = Vector3(0, 7.5, 15.0)
+offset = Vector3(0, 9.0, 17.5)
 
 [node name="TrackManager" type="Node3D" parent="."]
 script = ExtResource("4")
-track_piece_scene = ExtResource("2")
 ball_path = NodePath("../Ball")
 
 [node name="HUD" type="CanvasLayer" parent="."]
